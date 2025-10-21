@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Robot.ED.FacebookConnector.Service.RPA")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2d71e846cbb6f6dea6808a3bafc82c31d0612aaa")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+faf478580b3f3692c6a4dadc1414a688d53cb42d")]
 [assembly: System.Reflection.AssemblyProductAttribute("Robot.ED.FacebookConnector.Service.RPA")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Robot.ED.FacebookConnector.Service.RPA")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
