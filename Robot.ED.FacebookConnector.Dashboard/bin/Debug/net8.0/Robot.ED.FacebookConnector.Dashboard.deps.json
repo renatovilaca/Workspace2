@@ -9,6 +9,7 @@
       "Robot.ED.FacebookConnector.Dashboard/1.0.0": {
         "dependencies": {
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "8.0.21",
+          "Microsoft.AspNetCore.Identity.UI": "8.0.21",
           "Microsoft.EntityFrameworkCore.Design": "8.0.21",
           "Robot.ED.FacebookConnector.Common": "1.0.0"
         },
@@ -82,6 +83,18 @@
         },
         "runtime": {
           "lib/net8.0/Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll": {
+            "assemblyVersion": "8.0.21.0",
+            "fileVersion": "8.0.2125.47515"
+          }
+        }
+      },
+      "Microsoft.AspNetCore.Identity.UI/8.0.21": {
+        "dependencies": {
+          "Microsoft.Extensions.FileProviders.Embedded": "8.0.21",
+          "Microsoft.Extensions.Identity.Stores": "8.0.21"
+        },
+        "runtime": {
+          "lib/net8.0/Microsoft.AspNetCore.Identity.UI.dll": {
             "assemblyVersion": "8.0.21.0",
             "fileVersion": "8.0.2125.47515"
           }
@@ -418,6 +431,22 @@
           }
         }
       },
+      "Microsoft.Extensions.FileProviders.Abstractions/8.0.0": {
+        "dependencies": {
+          "Microsoft.Extensions.Primitives": "8.0.0"
+        }
+      },
+      "Microsoft.Extensions.FileProviders.Embedded/8.0.21": {
+        "dependencies": {
+          "Microsoft.Extensions.FileProviders.Abstractions": "8.0.0"
+        },
+        "runtime": {
+          "lib/net8.0/Microsoft.Extensions.FileProviders.Embedded.dll": {
+            "assemblyVersion": "8.0.0.0",
+            "fileVersion": "8.0.2125.47515"
+          }
+        }
+      },
       "Microsoft.Extensions.Identity.Core/8.0.21": {
         "dependencies": {
           "Microsoft.AspNetCore.Cryptography.KeyDerivation": "8.0.21",
@@ -673,6 +702,13 @@
       "path": "microsoft.aspnetcore.identity.entityframeworkcore/8.0.21",
       "hashPath": "microsoft.aspnetcore.identity.entityframeworkcore.8.0.21.nupkg.sha512"
     },
+    "Microsoft.AspNetCore.Identity.UI/8.0.21": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-vY5NeTGnGaEgGHIYsK2f9uPTd+HEH63+6pPVIA0YKbXM2X7AKvn8APZA+fBamN+X84E7xoCHSll67sRj6uLfiw==",
+      "path": "microsoft.aspnetcore.identity.ui/8.0.21",
+      "hashPath": "microsoft.aspnetcore.identity.ui.8.0.21.nupkg.sha512"
+    },
     "Microsoft.Bcl.AsyncInterfaces/6.0.0": {
       "type": "package",
       "serviceable": true,
@@ -791,6 +827,20 @@
       "sha512": "sha512-mUBDZZRgZrSyFOsJ2qJJ9fXfqd/kXJwf3AiDoqLD9m6TjY5OO/vLNOb9fb4juC0487eq4hcGN/M2Rh/CKS7QYw==",
       "path": "microsoft.extensions.dependencymodel/8.0.2",
       "hashPath": "microsoft.extensions.dependencymodel.8.0.2.nupkg.sha512"
+    },
+    "Microsoft.Extensions.FileProviders.Abstractions/8.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-ZbaMlhJlpisjuWbvXr4LdAst/1XxH3vZ6A0BsgTphZ2L4PGuxRLz7Jr/S7mkAAnOn78Vu0fKhEgNF5JO3zfjqQ==",
+      "path": "microsoft.extensions.fileproviders.abstractions/8.0.0",
+      "hashPath": "microsoft.extensions.fileproviders.abstractions.8.0.0.nupkg.sha512"
+    },
+    "Microsoft.Extensions.FileProviders.Embedded/8.0.21": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-JmAFU1Iuw84BbgPoHRPeEdlmyZHpTh3xdcM3+mYyNLm2OADHTvDMjoHnMLsxE7Qb5C18aWZror8Qr0+dsf0kcw==",
+      "path": "microsoft.extensions.fileproviders.embedded/8.0.21",
+      "hashPath": "microsoft.extensions.fileproviders.embedded.8.0.21.nupkg.sha512"
     },
     "Microsoft.Extensions.Identity.Core/8.0.21": {
       "type": "package",

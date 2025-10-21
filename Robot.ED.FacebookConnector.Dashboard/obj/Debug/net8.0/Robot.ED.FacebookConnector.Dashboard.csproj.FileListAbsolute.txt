@@ -122,3 +122,5 @@
 /home/runner/work/Workspace2/Workspace2/Robot.ED.FacebookConnector.Dashboard/obj/Debug/net8.0/Robot.ED.FacebookConnector.Dashboard.pdb
 /home/runner/work/Workspace2/Workspace2/Robot.ED.FacebookConnector.Dashboard/obj/Debug/net8.0/Robot.ED.FacebookConnector.Dashboard.genruntimeconfig.cache
 /home/runner/work/Workspace2/Workspace2/Robot.ED.FacebookConnector.Dashboard/obj/Debug/net8.0/ref/Robot.ED.FacebookConnector.Dashboard.dll
+/home/runner/work/Workspace2/Workspace2/Robot.ED.FacebookConnector.Dashboard/bin/Debug/net8.0/Microsoft.AspNetCore.Identity.UI.dll
+/home/runner/work/Workspace2/Workspace2/Robot.ED.FacebookConnector.Dashboard/bin/Debug/net8.0/Microsoft.Extensions.FileProviders.Embedded.dll
