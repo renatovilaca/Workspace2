@@ -44,3 +44,6 @@ screenshots/
 
 # Node modules (if any frontend tools are used)
 node_modules/
+
+# Rider
+.idea/
