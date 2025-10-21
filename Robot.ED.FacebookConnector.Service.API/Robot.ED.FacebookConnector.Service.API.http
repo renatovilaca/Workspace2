@@ -1,0 +1,6 @@
+@Robot.ED.FacebookConnector.Service.API_HostAddress = http://localhost:5161
+
+GET {{Robot.ED.FacebookConnector.Service.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
