@@ -10,16 +10,16 @@ namespace Robot.ED.FacebookConnector.Service.RPA.Services;
 
 public class RpaProcessingService : IRpaProcessingService
 {
-    private readonly HttpClient _httpClient;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly RpaSettings _settings;
     private readonly ILogger<RpaProcessingService> _logger;
 
     public RpaProcessingService(
-        HttpClient httpClient,
+        IHttpClientFactory httpClientFactory,
         IOptions<RpaSettings> settings,
         ILogger<RpaProcessingService> logger)
     {
-        _httpClient = httpClient;
+        _httpClientFactory = httpClientFactory;
         _settings = settings.Value;
         _logger = logger;
     }
@@ -185,11 +185,11 @@ public class RpaProcessingService : IRpaProcessingService
             var json = JsonSerializer.Serialize(result);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            _httpClient.DefaultRequestHeaders.Clear();
-            _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_settings.OrchestratorToken}");
+            using var httpClient = _httpClientFactory.CreateClient();
+            httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_settings.OrchestratorToken}");
 
             var url = $"{_settings.OrchestratorUrl.TrimEnd('/')}/api/rpa/result";
-            var response = await _httpClient.PostAsync(url, content);
+            var response = await httpClient.PostAsync(url, content);
 
             if (response.IsSuccessStatusCode)
             {

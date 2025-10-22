@@ -51,7 +51,7 @@ builder.Services.Configure<RpaSettings>(
     builder.Configuration.GetSection("RpaSettings"));
 
 // Register services
-builder.Services.AddHttpClient<IRpaProcessingService, RpaProcessingService>();
+builder.Services.AddHttpClient();
 builder.Services.AddScoped<IRpaProcessingService, RpaProcessingService>();
 
 // Add background services
