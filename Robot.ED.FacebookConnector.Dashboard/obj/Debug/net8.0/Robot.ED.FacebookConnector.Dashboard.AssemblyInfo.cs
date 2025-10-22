@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Robot.ED.FacebookConnector.Dashboard")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4d4fb3786a89d595383e750efb39de3bf97368f9")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+311ea56cf51006464a507d0a2a198493d336ac64")]
 [assembly: System.Reflection.AssemblyProductAttribute("Robot.ED.FacebookConnector.Dashboard")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Robot.ED.FacebookConnector.Dashboard")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
