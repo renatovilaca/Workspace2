@@ -1,0 +1,242 @@
+﻿@page
+@using Robot.ED.FacebookConnector.Dashboard.ViewModels
+@model IndexModel
+@{
+    ViewData["Title"] = "RPA Dashboard";
+}
+
+@if (Model.ViewModel.HasRecentError)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert" id="errorBanner">
+        <h5 class="alert-heading"><i class="bi bi-exclamation-triangle-fill"></i> Last Processing Error</h5>
+        <p class="mb-1"><strong>Track ID:</strong> @Model.ViewModel.LastErrorTrackId</p>
+        <p class="mb-1"><strong>Error:</strong> @Model.ViewModel.LastErrorMessage</p>
+        <p class="mb-0"><small><strong>Time:</strong> @Model.ViewModel.LastErrorTime?.ToString("yyyy-MM-dd HH:mm:ss UTC")</small></p>
+    </div>
+}
+
+<div class="row mb-4">
+    <div class="col-12">
+        <h2><i class="bi bi-speedometer2"></i> RPA Processing Dashboard</h2>
+        <p class="text-muted">Real-time monitoring of RPA queue processing and robot status</p>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-clock-history"></i> Pending Queue</h5>
+                <h2 class="mb-0">@Model.ViewModel.PendingQueueCount</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-info">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-check2-circle"></i> Processed Today</h5>
+                <h2 class="mb-0">@Model.ViewModel.ProcessedTodayCount</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-check-circle-fill"></i> Successes</h5>
+                <h2 class="mb-0">@Model.ViewModel.SuccessCount</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-danger">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-x-circle-fill"></i> Errors</h5>
+                <h2 class="mb-0">@Model.ViewModel.ErrorCount</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted"><i class="bi bi-robot"></i> Available Robots</h6>
+                <h3 class="text-success">@Model.ViewModel.AvailableRobotsCount</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted"><i class="bi bi-gear-fill"></i> Occupied Robots</h6>
+                <h3 class="text-warning">@Model.ViewModel.OccupiedRobotsCount</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted"><i class="bi bi-trophy-fill"></i> Most Active Robot</h6>
+                <h3>@(Model.ViewModel.MostAllocatedRobotName ?? "N/A")</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted"><i class="bi bi-clock"></i> Last Processing</h6>
+                <p class="mb-0">@(Model.ViewModel.LastProcessedTime?.ToString("yyyy-MM-dd HH:mm:ss UTC") ?? "No data")</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted"><i class="bi bi-inbox"></i> Last Request Received</h6>
+                <p class="mb-0">@(Model.ViewModel.LastRequestReceivedTime?.ToString("yyyy-MM-dd HH:mm:ss UTC") ?? "No data")</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-list-ul"></i> Recent Queue Items</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Track ID</th>
+                                <th>Channel</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.ViewModel.RecentQueues)
+                            {
+                                <tr>
+                                    <td>@item.TrackId</td>
+                                    <td>@item.Channel</td>
+                                    <td>
+                                        @if (item.IsProcessed)
+                                        {
+                                            @if (item.HasError)
+                                            {
+                                                <span class="badge bg-danger">Error</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-success">Success</span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning">Pending</span>
+                                        }
+                                    </td>
+                                    <td><small>@item.CreatedAt.ToString("HH:mm:ss")</small></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-robot"></i> Robot Status</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Robot</th>
+                                <th>Status</th>
+                                <th>Processed Today</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var robot in Model.ViewModel.RobotStatuses)
+                            {
+                                <tr>
+                                    <td>@robot.Name</td>
+                                    <td>
+                                        @if (robot.Available)
+                                        {
+                                            <span class="badge bg-success">Available</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning">Busy</span>
+                                        }
+                                    </td>
+                                    <td>@robot.ProcessedToday</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <canvas id="processingChart" height="80"></canvas>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        // Auto-refresh every N seconds
+        setTimeout(function() {
+            window.location.reload();
+        }, @Model.ViewModel.RefreshIntervalSeconds * 1000);
+
+        // Create processing chart
+        const ctx = document.getElementById('processingChart');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Success', 'Errors', 'Pending'],
+                datasets: [{
+                    data: [@Model.ViewModel.SuccessCount, @Model.ViewModel.ErrorCount, @Model.ViewModel.PendingQueueCount],
+                    backgroundColor: [
+                        'rgba(25, 135, 84, 0.8)',
+                        'rgba(220, 53, 69, 0.8)',
+                        'rgba(13, 110, 253, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(25, 135, 84, 1)',
+                        'rgba(220, 53, 69, 1)',
+                        'rgba(13, 110, 253, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Processing Status Overview'
+                    }
+                }
+            }
+        });
+    </script>
+}
