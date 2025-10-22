@@ -59,8 +59,6 @@ builder.Services.AddValidatorsFromAssemblyContaining<AllocateRequestValidator>()
 
 // Register services
 builder.Services.AddHttpClient<IWebhookService, WebhookService>();
-builder.Services.AddHttpClient<IRpaAllocationService, RpaAllocationService>();
-builder.Services.AddScoped<IWebhookService, WebhookService>();
 builder.Services.AddScoped<IRpaAllocationService, RpaAllocationService>();
 
 // Add background services

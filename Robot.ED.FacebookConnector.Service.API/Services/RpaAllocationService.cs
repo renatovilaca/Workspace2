@@ -10,18 +10,18 @@ namespace Robot.ED.FacebookConnector.Service.API.Services;
 public class RpaAllocationService : IRpaAllocationService
 {
     private readonly IServiceScopeFactory _scopeFactory;
-    private readonly HttpClient _httpClient;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly OrchestratorSettings _settings;
     private readonly ILogger<RpaAllocationService> _logger;
 
     public RpaAllocationService(
         IServiceScopeFactory scopeFactory,
-        HttpClient httpClient,
+        IHttpClientFactory httpClientFactory,
         IOptions<OrchestratorSettings> settings,
         ILogger<RpaAllocationService> logger)
     {
         _scopeFactory = scopeFactory;
-        _httpClient = httpClient;
+        _httpClientFactory = httpClientFactory;
         _settings = settings.Value;
         _logger = logger;
     }
@@ -139,7 +139,9 @@ public class RpaAllocationService : IRpaAllocationService
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             var url = $"{rpaUrl.TrimEnd('/')}/api/rpa/process";
-            var response = await _httpClient.PostAsync(url, content);
+            
+            using var httpClient = _httpClientFactory.CreateClient();
+            var response = await httpClient.PostAsync(url, content);
 
             if (response.IsSuccessStatusCode)
             {
