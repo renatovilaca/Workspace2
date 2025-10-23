@@ -1,5 +1,60 @@
+/* ===================================
+   Modern CSS Variables & Design System
+   =================================== */
+:root {
+  /* Modern Color Palette */
+  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  --danger-gradient: linear-gradient(135deg, #f83600 0%, #f9d423 100%);
+  --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  
+  /* Enhanced Colors */
+  --primary-color: #667eea;
+  --primary-dark: #5568d3;
+  --secondary-color: #764ba2;
+  --accent-color: #f093fb;
+  
+  /* Neutral Colors */
+  --bg-color: #f8f9fa;
+  --bg-dark: #2d3748;
+  --text-color: #2d3748;
+  --text-muted: #718096;
+  --border-color: #e2e8f0;
+  
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  
+  /* Shadows */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+  
+  /* Border Radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-base: 200ms ease;
+  --transition-slow: 300ms ease;
+}
+
+/* ===================================
+   Base Styles
+   =================================== */
 html {
   font-size: 14px;
+  position: relative;
+  min-height: 100%;
+  scroll-behavior: smooth;
 }
 
 @media (min-width: 768px) {
@@ -8,15 +63,460 @@ html {
   }
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
-}
-
 body {
   margin-bottom: 60px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background-attachment: fixed;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  color: var(--text-color);
+  line-height: 1.6;
+}
+
+/* ===================================
+   Enhanced Navbar
+   =================================== */
+.navbar {
+  background: var(--primary-gradient) !important;
+  box-shadow: var(--shadow-lg);
+  padding: 1rem 0;
+  transition: var(--transition-base);
+}
+
+.navbar-brand {
+  color: white !important;
+  font-weight: 700;
+  font-size: 1.5rem;
+  letter-spacing: -0.5px;
+  transition: var(--transition-fast);
+}
+
+.navbar-brand:hover {
+  transform: translateY(-2px);
+  color: var(--accent-color) !important;
+}
+
+.navbar .nav-link {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-weight: 500;
+  padding: 0.5rem 1rem !important;
+  border-radius: var(--radius-md);
+  transition: var(--transition-fast);
+  margin: 0 0.25rem;
+}
+
+.navbar .nav-link:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: white !important;
+  transform: translateY(-1px);
+}
+
+.navbar-toggler {
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  transition: var(--transition-fast);
+}
+
+.navbar-toggler:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* ===================================
+   Enhanced Cards
+   =================================== */
+.card {
+  border: none;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-base);
+  background: white;
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl);
+}
+
+.card-body {
+  padding: var(--spacing-lg);
+}
+
+.card-header {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-bottom: 2px solid var(--primary-color);
+  font-weight: 600;
+  padding: 1rem 1.5rem;
+}
+
+/* Colored Cards with Gradients */
+.card.bg-primary {
+  background: var(--primary-gradient) !important;
+  border: none;
+}
+
+.card.bg-success {
+  background: var(--success-gradient) !important;
+  border: none;
+}
+
+.card.bg-danger {
+  background: var(--danger-gradient) !important;
+  border: none;
+}
+
+.card.bg-info {
+  background: var(--info-gradient) !important;
+  border: none;
+}
+
+.card.bg-warning {
+  background: var(--warning-gradient) !important;
+  border: none;
+}
+
+/* ===================================
+   Enhanced Buttons
+   =================================== */
+.btn {
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  padding: 0.625rem 1.25rem;
+  transition: var(--transition-base);
+  border: none;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn-primary {
+  background: var(--primary-gradient);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #5568d3 0%, #654193 100%);
+}
+
+.btn-success {
+  background: var(--success-gradient);
+}
+
+.btn-danger {
+  background: var(--danger-gradient);
+}
+
+.btn-info {
+  background: var(--info-gradient);
+}
+
+.btn-warning {
+  background: var(--warning-gradient);
+  color: white;
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus {
+  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+/* ===================================
+   Enhanced Tables
+   =================================== */
+.table {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.table thead {
+  background: var(--primary-gradient);
+  color: white;
+}
+
+.table-dark {
+  background: var(--primary-gradient) !important;
+}
+
+.table thead th {
+  border: none;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.875rem;
+  letter-spacing: 0.5px;
+  padding: 1rem;
+}
+
+.table tbody tr {
+  transition: var(--transition-fast);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.table-hover tbody tr:hover {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  transform: scale(1.01);
+  box-shadow: var(--shadow-sm);
+}
+
+.table td {
+  padding: 1rem;
+  vertical-align: middle;
+}
+
+.table-responsive {
+  border-radius: var(--radius-lg);
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: rgba(102, 126, 234, 0.03);
+}
+
+/* ===================================
+   Enhanced Badges
+   =================================== */
+.badge {
+  padding: 0.5rem 0.875rem;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 0.875rem;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition-fast);
+}
+
+.badge:hover {
+  transform: scale(1.05);
+}
+
+.badge.bg-success {
+  background: var(--success-gradient) !important;
+}
+
+.badge.bg-danger {
+  background: var(--danger-gradient) !important;
+}
+
+.badge.bg-warning {
+  background: var(--warning-gradient) !important;
+  color: white !important;
+}
+
+.badge.bg-info {
+  background: var(--info-gradient) !important;
+}
+
+/* ===================================
+   Enhanced Alerts
+   =================================== */
+.alert {
+  border: none;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 1.25rem 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.alert::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 4px;
+  background: currentColor;
+}
+
+.alert-danger {
+  background: linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%);
+  color: #c53030;
+  border-left: 4px solid #f56565;
+}
+
+.alert-success {
+  background: linear-gradient(135deg, #f0fff4 0%, #e6ffed 100%);
+  color: #276749;
+  border-left: 4px solid #48bb78;
+}
+
+.alert-heading {
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+}
+
+/* ===================================
+   Enhanced Forms
+   =================================== */
+.form-control, .form-select {
+  border-radius: var(--radius-md);
+  border: 2px solid var(--border-color);
+  padding: 0.75rem 1rem;
+  transition: var(--transition-base);
+  background: white;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+  background: white;
+}
+
+.form-check-input {
+  border: 2px solid var(--border-color);
+  transition: var(--transition-fast);
+}
+
+.form-check-input:checked {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.form-check-input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+}
+
+/* ===================================
+   Typography Enhancements
+   =================================== */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: var(--spacing-md);
+  color: var(--text-color);
+}
+
+.display-4 {
+  font-weight: 700;
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ===================================
+   Footer
+   =================================== */
+.footer {
+  background: white;
+  box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.05);
+  padding: 1.5rem 0;
+  margin-top: 3rem;
+}
+
+/* ===================================
+   Utilities
+   =================================== */
+.text-gradient {
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.box-shadow {
+  box-shadow: var(--shadow-lg) !important;
+}
+
+/* ===================================
+   Icons Enhancement
+   =================================== */
+.bi {
+  transition: var(--transition-fast);
+}
+
+i.bi-check-circle, i.bi-check2-circle, i.bi-check-circle-fill {
+  color: #48bb78;
+}
+
+i.bi-x-circle, i.bi-x-circle-fill {
+  color: #f56565;
+}
+
+i.bi-exclamation-triangle-fill {
+  color: #ed8936;
+}
+
+/* ===================================
+   Animations
+   =================================== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease;
+}
+
+/* ===================================
+   Container Enhancements
+   =================================== */
+.container {
+  animation: fadeIn 0.6s ease;
+}
+
+main {
+  min-height: calc(100vh - 200px);
+}
+
+/* ===================================
+   Responsive Adjustments
+   =================================== */
+@media (max-width: 768px) {
+  .card {
+    margin-bottom: 1rem;
+  }
+  
+  .navbar-brand {
+    font-size: 1.25rem;
+  }
+  
+  h1, .display-4 {
+    font-size: 2rem;
+  }
+}
+
+/* ===================================
+   Loading States
+   =================================== */
+.btn.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.btn.loading::after {
+  content: '...';
+  animation: pulse 1s infinite;
+}
+
+/* ===================================
+   Print Styles
+   =================================== */
+@media print {
+  body {
+    background: white;
+  }
+  
+  .navbar, .footer {
+    display: none;
+  }
 }
