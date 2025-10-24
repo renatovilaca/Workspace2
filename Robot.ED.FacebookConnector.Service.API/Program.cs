@@ -6,8 +6,30 @@ using Robot.ED.FacebookConnector.Common.Validators;
 using Robot.ED.FacebookConnector.Service.API.BackgroundServices;
 using Robot.ED.FacebookConnector.Service.API.Middleware;
 using Robot.ED.FacebookConnector.Service.API.Services;
+using Serilog;
+
+// Configure Serilog
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Warning)
+    .MinimumLevel.Override("Microsoft.EntityFrameworkCore", Serilog.Events.LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .WriteTo.Console(outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
+    .WriteTo.File(
+        path: "logs/api-.log",
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 30,
+        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
+    .CreateLogger();
+
+try
+{
+    Log.Information("Starting Robot.ED.FacebookConnector.Service.API");
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add Serilog to the application
+builder.Host.UseSerilog();
 
 // Add services to the container
 builder.Services.AddControllers();
@@ -68,8 +90,11 @@ builder.Services.AddHostedService<DataExpirationBackgroundService>();
 // Configure Kestrel for HTTPS
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
-    serverOptions.ListenAnyIP(5000);
-    serverOptions.ListenAnyIP(5001, listenOptions =>
+    var httpPort = builder.Configuration.GetValue<int?>("Kestrel:HttpPort") ?? 5000;
+    var httpsPort = builder.Configuration.GetValue<int?>("Kestrel:HttpsPort") ?? 5001;
+    
+    serverOptions.ListenAnyIP(httpPort);
+    serverOptions.ListenAnyIP(httpsPort, listenOptions =>
     {
         listenOptions.UseHttps();
     });
@@ -112,3 +137,12 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}

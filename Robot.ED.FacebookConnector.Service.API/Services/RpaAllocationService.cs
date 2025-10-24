@@ -92,7 +92,7 @@ public class RpaAllocationService : IRpaAllocationService
             {
                 try
                 {
-                    await SendProcessRequestToRpaAsync(availableRobot.Url, pendingQueue);
+                    await SendProcessRequestToRpaAsync(availableRobot.Url, pendingQueue, availableRobot.Token);
                 }
                 catch (Exception ex)
                 {
@@ -112,7 +112,7 @@ public class RpaAllocationService : IRpaAllocationService
         }
     }
 
-    private async Task SendProcessRequestToRpaAsync(string rpaUrl, Common.Models.Queue queue)
+    private async Task SendProcessRequestToRpaAsync(string rpaUrl, Common.Models.Queue queue, string? token)
     {
         try
         {
@@ -141,6 +141,14 @@ public class RpaAllocationService : IRpaAllocationService
             var url = $"{rpaUrl.TrimEnd('/')}/api/rpa/process";
             
             using var httpClient = _httpClientFactory.CreateClient();
+            
+            // Add Authorization header if token is available
+            if (!string.IsNullOrWhiteSpace(token))
+            {
+                httpClient.DefaultRequestHeaders.Authorization = 
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            }
+            
             var response = await httpClient.PostAsync(url, content);
 
             if (response.IsSuccessStatusCode)
