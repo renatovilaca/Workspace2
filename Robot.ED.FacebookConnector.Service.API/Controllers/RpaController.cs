@@ -1,8 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Robot.ED.FacebookConnector.Common.Configuration;
 using Robot.ED.FacebookConnector.Common.DTOs;
-using Robot.ED.FacebookConnector.Common.Models;
 using Robot.ED.FacebookConnector.Service.API.Services;
 
 namespace Robot.ED.FacebookConnector.Service.API.Controllers;
@@ -11,18 +8,18 @@ namespace Robot.ED.FacebookConnector.Service.API.Controllers;
 [Route("api/rpa")]
 public class RpaController : ControllerBase
 {
-    private readonly AppDbContext _dbContext;
     private readonly ILogger<RpaController> _logger;
     private readonly IRpaResultService _rpaResultService;
+    private readonly IRpaAllocateService _rpaAllocateService;
 
     public RpaController(
-        AppDbContext dbContext, 
         ILogger<RpaController> logger,
-        IRpaResultService rpaResultService)
+        IRpaResultService rpaResultService,
+        IRpaAllocateService rpaAllocateService)
     {
-        _dbContext = dbContext;
         _logger = logger;
         _rpaResultService = rpaResultService;
+        _rpaAllocateService = rpaAllocateService;
     }
 
     [HttpPost("allocate")]
@@ -30,44 +27,8 @@ public class RpaController : ControllerBase
     {
         try
         {
-            _logger.LogInformation("Received allocation request for TrackId: {TrackId}", request.TrackId);
-
-            var queue = new Queue
-            {
-                AiConfig = request.AiConfig,
-                TrackId = request.TrackId,
-                BridgeKey = request.BridgeKey,
-                OriginType = request.OriginType,
-                MediaId = request.MediaId,
-                Customer = request.Customer,
-                Channel = request.Channel,
-                Phrase = request.Phrase,
-                CreatedAt = DateTime.UtcNow,
-                IsProcessed = false
-            };
-
-            // Add tags
-            foreach (var tag in request.Tags ?? new List<string>())
-            {
-                queue.QueueTags.Add(new QueueTag { Tag = tag });
-            }
-
-            // Add data items
-            foreach (var dataItem in request.Data ?? new List<DataItemDto>())
-            {
-                queue.QueueData.Add(new QueueData 
-                { 
-                    Header = dataItem.Header, 
-                    Value = dataItem.Value 
-                });
-            }
-
-            _dbContext.Queues.Add(queue);
-            await _dbContext.SaveChangesAsync();
-
-            _logger.LogInformation("Queue item created with Id: {Id}, UniqueId: {UniqueId}", queue.Id, queue.UniqueId);
-
-            return StatusCode(201, new { id = queue.Id, uniqueId = queue.UniqueId });
+            var (queueId, uniqueId) = await _rpaAllocateService.AllocateAsync(request);
+            return StatusCode(201, new { id = queueId, uniqueId = uniqueId });
         }
         catch (Exception ex)
         {
