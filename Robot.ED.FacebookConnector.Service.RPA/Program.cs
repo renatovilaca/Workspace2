@@ -3,8 +3,31 @@ using Robot.ED.FacebookConnector.Common.Configuration;
 using Robot.ED.FacebookConnector.Service.RPA.BackgroundServices;
 using Robot.ED.FacebookConnector.Service.RPA.Middleware;
 using Robot.ED.FacebookConnector.Service.RPA.Services;
+using Serilog;
+
+// Configure Serilog
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Warning)
+    .MinimumLevel.Override("Microsoft.EntityFrameworkCore", Serilog.Events.LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .WriteTo.Console(
+        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
+    .WriteTo.File(
+        path: "logs/rpa-api-.log",
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 30,
+        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
+    .CreateLogger();
+
+try
+{
+    Log.Information("Starting Robot.ED.FacebookConnector.Service.RPA");
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add Serilog
+builder.Host.UseSerilog();
 
 // Add services to the container
 builder.Services.AddControllers();
@@ -58,10 +81,13 @@ builder.Services.AddScoped<IRpaProcessingService, RpaProcessingService>();
 builder.Services.AddHostedService<DataExpirationBackgroundService>();
 
 // Configure Kestrel
+var httpPort = builder.Configuration.GetValue<int>("Kestrel:HttpPort", 8080);
+var httpsPort = builder.Configuration.GetValue<int>("Kestrel:HttpsPort", 8081);
+
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
-    serverOptions.ListenAnyIP(8080);
-    serverOptions.ListenAnyIP(8081, listenOptions =>
+    serverOptions.ListenAnyIP(httpPort);
+    serverOptions.ListenAnyIP(httpsPort, listenOptions =>
     {
         listenOptions.UseHttps();
     });
@@ -104,3 +130,12 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
