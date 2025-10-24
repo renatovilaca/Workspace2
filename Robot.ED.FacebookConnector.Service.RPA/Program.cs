@@ -75,9 +75,11 @@ builder.Services.Configure<RpaSettings>(
 
 // Register services
 builder.Services.AddHttpClient();
+builder.Services.AddSingleton<IChromeDriverManager, ChromeDriverManager>();
 builder.Services.AddScoped<IRpaProcessingService, RpaProcessingService>();
 
 // Add background services
+builder.Services.AddHostedService<ChromeDriverInitializationService>();
 builder.Services.AddHostedService<DataExpirationBackgroundService>();
 
 // Configure Kestrel
