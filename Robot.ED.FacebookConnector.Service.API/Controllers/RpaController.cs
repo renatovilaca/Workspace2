@@ -13,16 +13,16 @@ public class RpaController : ControllerBase
 {
     private readonly AppDbContext _dbContext;
     private readonly ILogger<RpaController> _logger;
-    private readonly IWebhookService _webhookService;
+    private readonly IRpaResultService _rpaResultService;
 
     public RpaController(
         AppDbContext dbContext, 
         ILogger<RpaController> logger,
-        IWebhookService webhookService)
+        IRpaResultService rpaResultService)
     {
         _dbContext = dbContext;
         _logger = logger;
-        _webhookService = webhookService;
+        _rpaResultService = rpaResultService;
     }
 
     [HttpPost("allocate")]
@@ -89,84 +89,16 @@ public class RpaController : ControllerBase
         {
             _logger.LogInformation("Received result for TrackId: {TrackId}", result.TrackId);
 
-            // Find the queue item by TrackId
-            var queueItem = await _dbContext.Queues
-                .FirstOrDefaultAsync(q => q.TrackId == result.TrackId);
+            var (success, errorMessage) = await _rpaResultService.ProcessResultAsync(result);
 
-            if (queueItem == null)
+            if (!success)
             {
-                _logger.LogWarning("Queue item not found for TrackId: {TrackId}", result.TrackId);
-                return NotFound(new { error = "Queue item not found" });
-            }
-
-            // Create queue result
-            var queueResult = new QueueResult
-            {
-                QueueId = queueItem.Id,
-                ProcessedByRobotId = queueItem.AllocatedRobotId,
-                HasError = result.HasError,
-                ErrorMessage = result.ErrorMessage,
-                TrackId = result.TrackId,
-                Type = result.Type,
-                MediaId = result.MediaId,
-                Channel = result.Channel,
-                Tag = result.Tag,
-                ReceivedAt = DateTime.UtcNow
-            };
-
-            // Add messages
-            foreach (var message in result.Messages ?? new List<string>())
-            {
-                queueResult.Messages.Add(new QueueResultMessage { Message = message });
-            }
-
-            // Add attachments
-            foreach (var attachment in result.Attachments ?? new List<AttachmentDto>())
-            {
-                queueResult.Attachments.Add(new QueueResultAttachment
+                if (errorMessage == "Queue item not found")
                 {
-                    AttachmentId = attachment.Id,
-                    Name = attachment.Name,
-                    ContentType = attachment.ContentType,
-                    Url = attachment.Url
-                });
-            }
-
-            _dbContext.QueueResults.Add(queueResult);
-
-            // Update queue item
-            queueItem.IsProcessed = true;
-            queueItem.HasError = result.HasError;
-            queueItem.ErrorMessage = result.ErrorMessage;
-            queueItem.UpdatedAt = DateTime.UtcNow;
-
-            // Mark robot as available again
-            if (queueItem.AllocatedRobotId.HasValue)
-            {
-                var robot = await _dbContext.Robots.FindAsync(queueItem.AllocatedRobotId.Value);
-                if (robot != null)
-                {
-                    robot.Available = true;
-                    _logger.LogInformation("Robot {RobotId} marked as available", robot.Id);
+                    return NotFound(new { error = errorMessage });
                 }
+                return StatusCode(500, new { error = errorMessage });
             }
-
-            await _dbContext.SaveChangesAsync();
-
-            // Forward result to webhook
-            _ = Task.Run(async () =>
-            {
-                try
-                {
-                    await _webhookService.ForwardResultAsync(result);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error forwarding result to webhook");
-                }
-            });
-
-            _logger.LogInformation("Result processed successfully for TrackId: {TrackId}", result.TrackId);
 
             return Ok(new { message = "Result processed successfully" });
         }
@@ -174,12 +106,6 @@ public class RpaController : ControllerBase
         {
             _logger.LogError(ex, "Error processing result");
             return StatusCode(500, new { error = "Internal server error" });
-        }
-        finally
-        {
-            // Memory cleanup
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
         }
     }
 }
