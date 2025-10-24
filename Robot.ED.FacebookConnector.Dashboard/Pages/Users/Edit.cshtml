@@ -1,0 +1,79 @@
+@page
+@model Robot.ED.FacebookConnector.Dashboard.Pages.Users.EditModel
+@{
+    ViewData["Title"] = "Edit User";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h1 class="display-4 mb-4">@ViewData["Title"]</h1>
+            
+            <div class="card">
+                <div class="card-body">
+                    <form method="post">
+                        <input type="hidden" asp-for="Input.Id" />
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Input.UserName" class="form-label"></label>
+                            <input asp-for="Input.UserName" class="form-control" readonly />
+                            <small class="form-text text-muted">Username cannot be changed</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Input.Email" class="form-label"></label>
+                            <input asp-for="Input.Email" class="form-control" type="email" />
+                            <span asp-validation-for="Input.Email" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Input.NewPassword" class="form-label"></label>
+                            <input asp-for="Input.NewPassword" class="form-control" type="password" />
+                            <span asp-validation-for="Input.NewPassword" class="text-danger"></span>
+                            <small class="form-text text-muted">Leave blank to keep current password</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Input.ConfirmPassword" class="form-label"></label>
+                            <input asp-for="Input.ConfirmPassword" class="form-control" type="password" />
+                            <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Roles</label>
+                            @foreach (var role in Model.AvailableRoles)
+                            {
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="Input.SelectedRoles" value="@role" 
+                                           id="role_@role" @(Model.Input.SelectedRoles != null && Model.Input.SelectedRoles.Contains(role) ? "checked" : "")>
+                                    <label class="form-check-label" for="role_@role">
+                                        @role
+                                    </label>
+                                </div>
+                            }
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            <input asp-for="Input.EmailConfirmed" class="form-check-input" type="checkbox" />
+                            <label asp-for="Input.EmailConfirmed" class="form-check-label"></label>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save"></i> Save Changes
+                            </button>
+                            <a asp-page="./Index" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Back to List
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
