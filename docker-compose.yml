@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: robotfb-postgres
+    environment:
+      POSTGRES_DB: robotfacebookconnector
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Robot.ED.FacebookConnector.Service.API/Dockerfile
+    container_name: robotfb-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:5000;https://+:5001
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=robotfacebookconnector;Username=postgres;Password=postgres
+    ports:
+      - "5000:5000"
+      - "5001:5001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  rpa:
+    build:
+      context: .
+      dockerfile: Robot.ED.FacebookConnector.Service.RPA/Dockerfile
+    container_name: robotfb-rpa
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080;https://+:8081
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=robotfacebookconnector;Username=postgres;Password=postgres
+      - RpaSettings__OrchestratorUrl=http://api:5000
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    volumes:
+      - rpa_screenshots:/app/screenshots
+    depends_on:
+      - postgres
+      - api
+    restart: unless-stopped
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: Robot.ED.FacebookConnector.Dashboard/Dockerfile
+    container_name: robotfb-dashboard
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:7000;https://+:7001
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=robotfacebookconnector;Username=postgres;Password=postgres
+    ports:
+      - "7000:7000"
+      - "7001:7001"
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  rpa_screenshots:
