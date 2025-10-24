@@ -25,6 +25,10 @@ bld/
 [Ll]og/
 [Ll]ogs/
 
+# Log files
+logs/
+*.log
+
 # Visual Studio cache/options directory
 .vs/
 

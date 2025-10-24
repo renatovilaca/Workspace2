@@ -17,5 +17,7 @@ public class Robot
 
     public DateTime? LastAllocatedAt { get; set; }
 
+    public string? Token { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
