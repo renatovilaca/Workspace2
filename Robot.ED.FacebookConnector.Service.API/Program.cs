@@ -8,6 +8,10 @@ using Robot.ED.FacebookConnector.Service.API.Middleware;
 using Robot.ED.FacebookConnector.Service.API.Services;
 using Serilog;
 
+// Set console background color to dark blue
+Console.BackgroundColor = ConsoleColor.DarkBlue;
+Console.Clear();
+
 // Configure Serilog
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
@@ -83,6 +87,7 @@ builder.Services.AddValidatorsFromAssemblyContaining<AllocateRequestValidator>()
 builder.Services.AddHttpClient<IWebhookService, WebhookService>();
 builder.Services.AddScoped<IRpaAllocationService, RpaAllocationService>();
 builder.Services.AddScoped<IRpaResultService, RpaResultService>();
+builder.Services.AddScoped<IRpaAllocateService, RpaAllocateService>();
 
 // Add background services
 builder.Services.AddHostedService<RpaAllocationBackgroundService>();

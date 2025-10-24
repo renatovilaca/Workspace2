@@ -60,11 +60,11 @@ public class RpaAllocationService : IRpaAllocationService
                 return;
             }
 
-            // Find pending queue item that hasn't exceeded retry limit
+            // Find pending queue item that hasn't exceeded retry limit and is not already allocated
             var pendingQueue = await dbContext.Queues
                 .Include(q => q.QueueTags)
                 .Include(q => q.QueueData)
-                .Where(q => !q.IsProcessed && q.RetryCount < _settings.MaxRetryAttempts)
+                .Where(q => !q.IsProcessed && q.RetryCount < _settings.MaxRetryAttempts && q.AllocatedRobotId == null)
                 .OrderBy(q => q.CreatedAt)
                 .FirstOrDefaultAsync();
 
