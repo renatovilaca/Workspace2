@@ -204,3 +204,224 @@ For issues or questions about these implementations, please refer to:
 - The commit history for this feature
 - The Entity Framework migration files
 - The Serilog documentation: https://serilog.net/
+
+---
+
+# Robot.ED.FacebookConnector.Service.RPA Enhancements
+
+This section describes the enhancements made to the Robot.ED.FacebookConnector.Service.RPA project.
+
+## 1. Configurable Kestrel Server Ports
+
+### Overview
+Made HTTP and HTTPS ports configurable through application settings instead of hardcoded values.
+
+### Changes Made
+
+#### Configuration Files
+- **File Modified**: `Robot.ED.FacebookConnector.Service.RPA/appsettings.json`
+- **Added Section**:
+```json
+{
+  "Kestrel": {
+    "HttpPort": 8080,
+    "HttpsPort": 8081
+  }
+}
+```
+
+#### Application Startup
+- **File Modified**: `Robot.ED.FacebookConnector.Service.RPA/Program.cs`
+- **Change**: Updated Kestrel configuration to read ports from configuration
+- **Default Values**: HTTP on port 8080, HTTPS on port 8081
+- **Flexibility**: Can be overridden via:
+  - Environment-specific configuration files (e.g., `appsettings.Development.json`)
+  - Environment variables (e.g., `Kestrel__HttpPort=8080`)
+
+### Configuration Example
+
+```json
+{
+  "Kestrel": {
+    "HttpPort": 8080,
+    "HttpsPort": 8443
+  }
+}
+```
+
+### Code Changes
+
+```csharp
+// Configure Kestrel
+var httpPort = builder.Configuration.GetValue<int>("Kestrel:HttpPort", 8080);
+var httpsPort = builder.Configuration.GetValue<int>("Kestrel:HttpsPort", 8081);
+
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.ListenAnyIP(httpPort);
+    serverOptions.ListenAnyIP(httpsPort, listenOptions =>
+    {
+        listenOptions.UseHttps();
+    });
+});
+```
+
+## 2. Serilog Integration with Daily Rotating Logs
+
+### Overview
+Implemented structured logging with Serilog to improve observability and troubleshooting.
+
+### Changes Made
+
+#### Packages Added
+- **File Modified**: `Robot.ED.FacebookConnector.Service.RPA/Robot.ED.FacebookConnector.Service.RPA.csproj`
+- **Serilog.AspNetCore**: Version 9.0.0
+- **Serilog.Sinks.File**: Version 7.0.0
+
+#### Features
+- **Daily Rotating Logs**: Files created in `logs/rpa-api-{date}.log` format
+- **30-Day Retention**: Automatic cleanup of logs older than 30 days
+- **Console Output**: For development/debugging
+- **Custom Output Template**: With timestamps, log levels, and exception details
+- **Full Integration**: With ASP.NET Core logging pipeline
+
+#### Configuration
+- **File Modified**: `Robot.ED.FacebookConnector.Service.RPA/Program.cs`
+- **Log Configuration**:
+  - Minimum level: Information
+  - Microsoft.AspNetCore: Warning
+  - Microsoft.EntityFrameworkCore: Warning
+  - Enriched with log context
+  - Dual output: Console and File
+
+#### Serilog Setup Code
+
+```csharp
+using Serilog;
+
+// Configure Serilog
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Warning)
+    .MinimumLevel.Override("Microsoft.EntityFrameworkCore", Serilog.Events.LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .WriteTo.Console(
+        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
+    .WriteTo.File(
+        path: "logs/rpa-api-.log",
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 30,
+        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
+    .CreateLogger();
+
+try
+{
+    Log.Information("Starting Robot.ED.FacebookConnector.Service.RPA");
+    
+    var builder = WebApplication.CreateBuilder(args);
+    
+    // Add Serilog
+    builder.Host.UseSerilog();
+    
+    // ... rest of application configuration
+    
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
+```
+
+#### Output Template
+```
+{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}
+```
+
+### Log Output Example
+
+```
+2025-10-23 23:30:45.123 +00:00 [INF] Starting Robot.ED.FacebookConnector.Service.RPA
+2025-10-23 23:30:46.456 +00:00 [INF] Allocated Robot 1 to Queue 42, Attempt 1
+```
+
+### Log Files Location
+- **Directory**: `logs/` (in the application root)
+- **File Pattern**: `rpa-api-YYYYMMDD.log`
+- **Example**: `logs/rpa-api-20251024.log`
+
+## 3. Additional Improvements
+
+### .gitignore Updates
+- **File**: `.gitignore`
+- **Status**: Already contains proper exclusions
+  - `logs/` directory exclusion
+  - `*.log` file pattern exclusion
+- **Purpose**: Prevent log files from being committed to version control
+
+### Documentation
+- **File Updated**: `IMPLEMENTATION_NOTES.md` (this file)
+- **Purpose**: Comprehensive documentation of all changes to both API and RPA services
+
+## Backward Compatibility
+
+All changes are fully backward compatible:
+
+1. **Kestrel Ports**: Default values (8080/8081) are used if not configured
+2. **Logging**: Replaces standard ASP.NET Core logging without breaking existing log calls
+3. **Configuration**: All settings are optional with sensible defaults
+
+## Testing Recommendations
+
+### Configurable Ports
+1. Run with default configuration - verify ports 8080/8081
+2. Override via appsettings.json - verify custom ports
+3. Override via environment variables - verify environment takes precedence
+
+### Serilog
+1. Start the application - verify `logs/` directory is created
+2. Generate log entries - verify they appear in both console and file
+3. Check log file format - verify timestamp and level formatting
+4. Wait for day rollover - verify new log file is created (format: `rpa-api-YYYYMMDD.log`)
+5. Check retention - verify old logs are cleaned up after 30 days
+
+## Configuration Override Examples
+
+### Via appsettings.Development.json
+```json
+{
+  "Kestrel": {
+    "HttpPort": 8080,
+    "HttpsPort": 8443
+  }
+}
+```
+
+### Via Environment Variables
+```bash
+export Kestrel__HttpPort=8080
+export Kestrel__HttpsPort=8443
+```
+
+### Via Docker Compose
+```yaml
+environment:
+  - Kestrel__HttpPort=8080
+  - Kestrel__HttpsPort=8443
+```
+
+## Comparison: API vs RPA Service Configurations
+
+| Feature | API Service | RPA Service |
+|---------|-------------|-------------|
+| HTTP Port (default) | 5000 | 8080 |
+| HTTPS Port (default) | 5001 | 8081 |
+| Log File Pattern | `logs/api-{date}.log` | `logs/rpa-api-{date}.log` |
+| Log Retention | 30 days | 30 days |
+| Serilog Version | 9.0.0 | 9.0.0 |
+| Configuration | Via appsettings.json | Via appsettings.json |
+
