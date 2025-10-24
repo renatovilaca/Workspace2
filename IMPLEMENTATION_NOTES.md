@@ -425,3 +425,330 @@ environment:
 | Serilog Version | 9.0.0 | 9.0.0 |
 | Configuration | Via appsettings.json | Via appsettings.json |
 
+---
+
+# Robot.ED.FacebookConnector.Service.Watchdog
+
+This section describes the implementation of the Watchdog Service for monitoring and restarting applications.
+
+## Overview
+
+The Watchdog Service is a Windows background service that monitors the execution of critical applications (Robot.ED.FacebookConnector.Service.API and Robot.ED.FacebookConnector.Service.RPA). When an application stops, the watchdog automatically restarts it and sends email notifications via AWS SES.
+
+## Features
+
+### 1. Process Monitoring
+- Configurable check interval (default: 60 seconds)
+- Monitors multiple applications simultaneously
+- Detects when processes are not running
+- Automatically restarts stopped applications
+
+### 2. Email Notifications via AWS SES
+- Sends notifications when applications stop
+- Sends notifications when applications are restarted
+- Configurable recipient list
+- Email notifications can be enabled/disabled
+- Supports AWS credentials or IAM roles
+
+### 3. Serilog Integration with Daily Rotating Logs
+- Daily rotating log files in `logs/watchdog-{date}.log` format
+- 30-day retention policy for automatic cleanup
+- Console output for development/debugging
+- Custom output template with timestamps, log levels, and exception details
+- Full integration with .NET logging pipeline
+
+### 4. Configurable Settings
+All settings are configured via `appsettings.json`:
+- Check interval
+- List of monitored applications
+- Application executable paths and arguments
+- Email notification settings
+- AWS SES configuration
+
+## Changes Made
+
+### Project Created
+- **Project**: `Robot.ED.FacebookConnector.Service.Watchdog`
+- **Type**: .NET 8.0 Worker Service
+- **Platform**: Windows Service compatible
+
+### Packages Added
+- **Microsoft.Extensions.Hosting.WindowsServices**: Version 8.0.* - Windows Service support
+- **AWSSDK.SimpleEmail**: Version 3.7.* - AWS SES email notifications
+- **Serilog.AspNetCore**: Version 9.0.0 - Structured logging
+- **Serilog.Sinks.File**: Version 7.0.0 - File logging with rotation
+
+### Files Created
+
+#### Configuration Models
+1. **WatchdogSettings.cs**
+   - `CheckIntervalSeconds`: Interval between checks (default: 60)
+   - `Applications`: List of applications to monitor
+
+2. **EmailSettings.cs**
+   - `NotificationEnabled`: Enable/disable notifications
+   - `SenderEmail`: Email address for sending notifications
+   - `Recipients`: List of email recipients
+   - `AwsRegion`: AWS region for SES
+   - `AwsAccessKeyId`: AWS access key (optional, can use IAM role)
+   - `AwsSecretAccessKey`: AWS secret key (optional)
+
+#### Services
+1. **ProcessMonitoringService.cs**
+   - `IsProcessRunning()`: Check if a process is running
+   - `StartProcess()`: Start a stopped process
+
+2. **EmailNotificationService.cs**
+   - `SendApplicationStoppedNotificationAsync()`: Send stopped notification
+   - `SendApplicationRestartedNotificationAsync()`: Send restarted notification
+   - HTML email formatting
+   - AWS SES integration
+
+#### Worker Service
+**Worker.cs**
+- Main background service logic
+- Periodic monitoring loop
+- State tracking for applications
+- Coordinates process monitoring and notifications
+
+#### Application Entry Point
+**Program.cs**
+- Serilog configuration
+- Service registration
+- Windows Service support
+- Configuration binding
+
+### Configuration File
+
+**appsettings.json**
+```json
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft": "Warning",
+      "System": "Warning"
+    }
+  },
+  "WatchdogSettings": {
+    "CheckIntervalSeconds": 60,
+    "Applications": [
+      {
+        "Name": "Robot.ED.FacebookConnector.Service.API",
+        "ProcessName": "Robot.ED.FacebookConnector.Service.API",
+        "ExecutablePath": "C:\\Path\\To\\Robot.ED.FacebookConnector.Service.API.exe",
+        "Arguments": "",
+        "WorkingDirectory": "C:\\Path\\To\\API\\Directory"
+      },
+      {
+        "Name": "Robot.ED.FacebookConnector.Service.RPA",
+        "ProcessName": "Robot.ED.FacebookConnector.Service.RPA",
+        "ExecutablePath": "C:\\Path\\To\\Robot.ED.FacebookConnector.Service.RPA.exe",
+        "Arguments": "",
+        "WorkingDirectory": "C:\\Path\\To\\RPA\\Directory"
+      }
+    ]
+  },
+  "EmailSettings": {
+    "NotificationEnabled": true,
+    "SenderEmail": "watchdog@example.com",
+    "Recipients": [
+      "admin@example.com",
+      "team@example.com"
+    ],
+    "AwsRegion": "us-east-1",
+    "AwsAccessKeyId": "",
+    "AwsSecretAccessKey": ""
+  }
+}
+```
+
+## Log Output Example
+
+```
+2025-10-24 14:37:45.123 +00:00 [INF] Starting Robot.ED.FacebookConnector.Service.Watchdog
+2025-10-24 14:37:45.456 +00:00 [INF] Watchdog service started. Monitoring 2 application(s)
+2025-10-24 14:37:45.457 +00:00 [INF] Monitoring: Robot.ED.FacebookConnector.Service.API (Process: Robot.ED.FacebookConnector.Service.API)
+2025-10-24 14:37:45.458 +00:00 [INF] Monitoring: Robot.ED.FacebookConnector.Service.RPA (Process: Robot.ED.FacebookConnector.Service.RPA)
+2025-10-24 14:38:45.789 +00:00 [WRN] Application Robot.ED.FacebookConnector.Service.API is not running
+2025-10-24 14:38:46.012 +00:00 [INF] Starting process Robot.ED.FacebookConnector.Service.API from C:\Path\To\Robot.ED.FacebookConnector.Service.API.exe
+2025-10-24 14:38:46.345 +00:00 [INF] Successfully started process Robot.ED.FacebookConnector.Service.API (PID: 12345)
+2025-10-24 14:38:46.678 +00:00 [INF] Application Robot.ED.FacebookConnector.Service.API restarted successfully
+2025-10-24 14:38:46.901 +00:00 [INF] Email sent successfully. MessageId: 01000192f8c5e1d8-a1b2c3d4-e5f6-7890-abcd-ef1234567890-000000
+```
+
+## Email Notification Examples
+
+### Application Stopped Email
+- **Subject**: ⚠️ Application Stopped: Robot.ED.FacebookConnector.Service.API
+- **Body**: HTML formatted with application name, status (STOPPED in red), and timestamp
+
+### Application Restarted Email
+- **Subject**: ✅ Application Restarted: Robot.ED.FacebookConnector.Service.API
+- **Body**: HTML formatted with application name, status (RESTARTED in green), and timestamp
+
+## Installation and Configuration
+
+### 1. Configure Application Paths
+Edit `appsettings.json` and update the executable paths for the monitored applications:
+```json
+"ExecutablePath": "C:\\Path\\To\\Your\\Application.exe",
+"WorkingDirectory": "C:\\Path\\To\\Application\\Directory"
+```
+
+### 2. Configure AWS SES
+You have two options:
+
+#### Option A: Use AWS Credentials
+```json
+"EmailSettings": {
+  "AwsAccessKeyId": "YOUR_ACCESS_KEY",
+  "AwsSecretAccessKey": "YOUR_SECRET_KEY",
+  "AwsRegion": "us-east-1"
+}
+```
+
+#### Option B: Use IAM Role (Recommended for EC2/ECS)
+```json
+"EmailSettings": {
+  "AwsRegion": "us-east-1"
+}
+```
+Leave credentials empty to use the default AWS credential chain.
+
+### 3. Configure Recipients
+```json
+"Recipients": [
+  "admin@example.com",
+  "team@example.com"
+]
+```
+
+### 4. Install as Windows Service
+```powershell
+# Build the project in Release mode
+dotnet publish -c Release
+
+# Create the service using sc.exe
+sc.exe create "Robot.ED.FacebookConnector.Watchdog" binPath="C:\Path\To\Robot.ED.FacebookConnector.Service.Watchdog.exe"
+
+# Start the service
+sc.exe start "Robot.ED.FacebookConnector.Watchdog"
+```
+
+### 5. Configure Service Startup
+```powershell
+# Set service to start automatically
+sc.exe config "Robot.ED.FacebookConnector.Watchdog" start=auto
+```
+
+## Testing Recommendations
+
+### Process Monitoring
+1. Start the watchdog service
+2. Verify it detects running applications
+3. Stop a monitored application manually
+4. Verify the watchdog restarts it within the check interval
+5. Check logs for monitoring activity
+
+### Email Notifications
+1. Configure a test email address
+2. Stop a monitored application
+3. Verify you receive the "Application Stopped" email
+4. Verify you receive the "Application Restarted" email
+5. Test with notifications disabled (`NotificationEnabled: false`)
+
+### AWS SES Configuration
+1. Verify sender email is verified in AWS SES
+2. If in sandbox mode, verify recipient emails are verified
+3. Test with both credentials and IAM role configurations
+4. Monitor AWS SES sending statistics
+
+### Logging
+1. Start the service and verify `logs/` directory is created
+2. Check log file format and content
+3. Verify daily log rotation
+4. Verify 30-day retention cleanup
+
+## Troubleshooting
+
+### Common Issues
+
+**Watchdog doesn't restart applications:**
+- Check executable paths in configuration
+- Verify working directories exist
+- Check process names match exactly (case-sensitive)
+- Review logs for error messages
+
+**Email notifications not sent:**
+- Verify AWS SES credentials
+- Check sender email is verified in AWS SES
+- Verify recipient emails (if in SES sandbox)
+- Check AWS region configuration
+- Review logs for AWS errors
+
+**Service won't start:**
+- Check .NET 8.0 Runtime is installed
+- Verify service account has necessary permissions
+- Check Event Viewer for service startup errors
+- Review watchdog logs
+
+## Architecture
+
+### Service Flow
+1. Worker service starts and loads configuration
+2. Initializes process monitoring and email services
+3. Enters monitoring loop with configurable interval
+4. For each monitored application:
+   - Checks if process is running
+   - If not running:
+     - Sends "stopped" notification (if previously running)
+     - Attempts to restart process
+     - Sends "restarted" notification on success
+   - Updates application state
+5. Waits for next check interval
+6. Repeats until service is stopped
+
+### Dependencies
+```
+Worker (BackgroundService)
+  ├── ProcessMonitoringService
+  │   └── System.Diagnostics.Process
+  ├── EmailNotificationService
+  │   └── AWS.SimpleEmail
+  └── WatchdogSettings / EmailSettings
+```
+
+## Security Considerations
+
+1. **AWS Credentials**: Use IAM roles instead of hardcoded credentials when possible
+2. **File Permissions**: Ensure proper permissions on configuration files
+3. **Process Permissions**: Service account must have rights to start monitored processes
+4. **Email Content**: Notifications contain application names but no sensitive data
+
+## Backward Compatibility
+
+This is a new service and does not affect existing services. It can be:
+- Installed independently
+- Configured to monitor any number of applications
+- Disabled without affecting monitored applications
+
+## Log Files Location
+- **Directory**: `logs/` (in the application root)
+- **File Pattern**: `watchdog-YYYYMMDD.log`
+- **Example**: `logs/watchdog-20251024.log`
+- **Retention**: 30 days
+
+## Comparison: All Services
+
+| Feature | API Service | RPA Service | Watchdog Service |
+|---------|-------------|-------------|------------------|
+| Type | Web API | Web API | Worker Service |
+| HTTP Port (default) | 5000 | 8080 | N/A |
+| HTTPS Port (default) | 5001 | 8081 | N/A |
+| Log File Pattern | `logs/api-{date}.log` | `logs/rpa-api-{date}.log` | `logs/watchdog-{date}.log` |
+| Log Retention | 30 days | 30 days | 30 days |
+| Serilog Version | 9.0.0 | 9.0.0 | 9.0.0 |
+| Purpose | Orchestrator | RPA Execution | Process Monitoring |
+| Windows Service | No | No | Yes |
+
