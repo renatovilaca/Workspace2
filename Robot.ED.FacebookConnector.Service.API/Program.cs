@@ -92,6 +92,7 @@ builder.Services.AddScoped<IRpaAllocateService, RpaAllocateService>();
 // Add background services
 builder.Services.AddHostedService<RpaAllocationBackgroundService>();
 builder.Services.AddHostedService<DataExpirationBackgroundService>();
+builder.Services.AddHostedService<QueueTimeoutBackgroundService>();
 
 // Configure Kestrel for HTTPS
 builder.WebHost.ConfigureKestrel(serverOptions =>
