@@ -18,6 +18,7 @@ public class AppDbContext : DbContext
     public DbSet<Models.Robot> Robots { get; set; } = null!;
     public DbSet<Token> Tokens { get; set; } = null!;
     public DbSet<User> Users { get; set; } = null!;
+    public DbSet<RpaSetting> RpaSettings { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -102,6 +103,13 @@ public class AppDbContext : DbContext
             entity.ToTable("user");
             entity.HasKey(e => e.Id);
             entity.HasIndex(e => e.TokenValue).IsUnique();
+        });
+
+        modelBuilder.Entity<RpaSetting>(entity =>
+        {
+            entity.ToTable("rpa_settings");
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.Key).IsUnique();
         });
     }
 }
