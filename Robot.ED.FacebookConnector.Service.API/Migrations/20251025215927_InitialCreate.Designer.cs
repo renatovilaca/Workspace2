@@ -12,8 +12,8 @@ using Robot.ED.FacebookConnector.Common.Configuration;
 namespace Robot.ED.FacebookConnector.Service.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251025203631_AddRpaSettingsTable")]
-    partial class AddRpaSettingsTable
+    [Migration("20251025215927_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

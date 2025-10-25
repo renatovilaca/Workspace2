@@ -282,6 +282,9 @@ namespace Robot.ED.FacebookConnector.Dashboard.Migrations.AppDb
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("Token")
+                        .HasColumnType("text");
+
                     b.Property<string>("Url")
                         .IsRequired()
                         .HasColumnType("text");
@@ -291,6 +294,37 @@ namespace Robot.ED.FacebookConnector.Dashboard.Migrations.AppDb
                     b.HasIndex("Available");
 
                     b.ToTable("robot", (string)null);
+                });
+
+            modelBuilder.Entity("Robot.ED.FacebookConnector.Common.Models.RpaSetting", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Key")
+                        .IsUnique();
+
+                    b.ToTable("rpa_settings", (string)null);
                 });
 
             modelBuilder.Entity("Robot.ED.FacebookConnector.Common.Models.Token", b =>
