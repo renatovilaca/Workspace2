@@ -13,15 +13,18 @@ public class RpaProcessingService : IRpaProcessingService
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly RpaSettings _settings;
     private readonly ILogger<RpaProcessingService> _logger;
+    private readonly IChromeDriverManager _chromeDriverManager;
 
     public RpaProcessingService(
         IHttpClientFactory httpClientFactory,
         IOptions<RpaSettings> settings,
-        ILogger<RpaProcessingService> logger)
+        ILogger<RpaProcessingService> logger,
+        IChromeDriverManager chromeDriverManager)
     {
         _httpClientFactory = httpClientFactory;
         _settings = settings.Value;
         _logger = logger;
+        _chromeDriverManager = chromeDriverManager;
     }
 
     public async Task ProcessAsync(ProcessRequestDto request)
@@ -48,20 +51,10 @@ public class RpaProcessingService : IRpaProcessingService
             var screenshotPath = Path.Combine(Directory.GetCurrentDirectory(), _settings.ScreenshotPath);
             Directory.CreateDirectory(screenshotPath);
 
-            // Configure Chrome options
-            var options = new ChromeOptions();
-            options.AddArgument("--headless");
-            options.AddArgument("--no-sandbox");
-            options.AddArgument("--disable-dev-shm-usage");
-            options.AddArgument("--disable-gpu");
-            options.AddArgument("--window-size=1920,1080");
+            // Get or initialize the shared ChromeDriver
+            driver = await _chromeDriverManager.EnsureDriverAsync();
 
-            // Create driver
-            driver = new ChromeDriver(options);
-            driver.Manage().Timeouts().PageLoad = TimeSpan.FromMinutes(_settings.ProcessTimeoutMinutes);
-            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
-
-            _logger.LogInformation("Navigating to Facebook");
+            _logger.LogInformation("Using shared ChromeDriver instance, navigating to Facebook");
             driver.Navigate().GoToUrl("https://www.facebook.com");
 
             // Wait for page to load
@@ -86,9 +79,9 @@ public class RpaProcessingService : IRpaProcessingService
 
             _logger.LogInformation("Login completed successfully");
 
-            // Close browser
-            driver.Quit();
-            driver = null;
+            // DO NOT close the browser - keep it open for reuse
+            // driver.Quit();
+            // driver = null;
 
             result.HasError = false;
             result.Messages.Add("Facebook login automation completed successfully");
@@ -104,7 +97,7 @@ public class RpaProcessingService : IRpaProcessingService
             // Take screenshot
             if (driver != null)
             {
-                await TakeScreenshotAsync(driver, request.QueueId, "element-not-found");
+                TakeScreenshot(driver, request.QueueId, "element-not-found");
                 screenshotTaken = true;
             }
         }
@@ -117,7 +110,7 @@ public class RpaProcessingService : IRpaProcessingService
             // Take screenshot
             if (driver != null)
             {
-                await TakeScreenshotAsync(driver, request.QueueId, "timeout");
+                TakeScreenshot(driver, request.QueueId, "timeout");
                 screenshotTaken = true;
             }
         }
@@ -130,25 +123,14 @@ public class RpaProcessingService : IRpaProcessingService
             // Take screenshot
             if (driver != null && !screenshotTaken)
             {
-                await TakeScreenshotAsync(driver, request.QueueId, "error");
+                TakeScreenshot(driver, request.QueueId, "error");
             }
         }
         finally
         {
-            // Ensure driver is closed
-            if (driver != null)
-            {
-                try
-                {
-                    driver.Quit();
-                    driver.Dispose();
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "Error disposing WebDriver");
-                }
-            }
-
+            // DO NOT dispose the shared driver - it's managed by ChromeDriverManager
+            // The driver instance is reused across requests
+            
             // Send result back to orchestrator
             await SendResultToOrchestratorAsync(result);
 
@@ -158,7 +140,7 @@ public class RpaProcessingService : IRpaProcessingService
         }
     }
 
-    private async Task TakeScreenshotAsync(IWebDriver driver, int queueId, string reason)
+    private void TakeScreenshot(IWebDriver driver, int queueId, string reason)
     {
         try
         {
