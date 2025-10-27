@@ -4,8 +4,31 @@ using Robot.ED.FacebookConnector.Common.Configuration;
 using Robot.ED.FacebookConnector.Dashboard.Data;
 using Robot.ED.FacebookConnector.Dashboard.Models;
 using Robot.ED.FacebookConnector.Dashboard.Services;
+using Serilog;
 
-var builder = WebApplication.CreateBuilder(args);
+// Configure Serilog
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Warning)
+    .MinimumLevel.Override("Microsoft.EntityFrameworkCore", Serilog.Events.LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .WriteTo.Console(
+        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
+    .WriteTo.File(
+        path: "logs/dashboard-api-.log",
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 30,
+        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
+    .CreateLogger();
+
+try
+{
+    Log.Information("Starting Robot.ED.FacebookConnector.Dashboard");
+
+    var builder = WebApplication.CreateBuilder(args);
+
+    // Add Serilog
+    builder.Host.UseSerilog();
 
 // Add services to the container.
 builder.Services.AddRazorPages();
@@ -42,10 +65,13 @@ builder.Services.Configure<DashboardSettings>(
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 // Configure Kestrel
+var httpPort = builder.Configuration.GetValue<int>("Kestrel:HttpPort", 7000);
+var httpsPort = builder.Configuration.GetValue<int>("Kestrel:HttpsPort", 7001);
+
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
-    serverOptions.ListenAnyIP(7000);
-    serverOptions.ListenAnyIP(7001, listenOptions =>
+    serverOptions.ListenAnyIP(httpPort);
+    serverOptions.ListenAnyIP(httpsPort, listenOptions =>
     {
         listenOptions.UseHttps();
     });
@@ -180,4 +206,13 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-app.Run();
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
