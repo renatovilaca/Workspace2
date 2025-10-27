@@ -401,6 +401,9 @@ namespace Robot.ED.FacebookConnector.Dashboard.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("Token")
+                        .HasColumnType("text");
+
                     b.Property<string>("Url")
                         .IsRequired()
                         .HasColumnType("text");
