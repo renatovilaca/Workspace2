@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
@@ -14,17 +15,20 @@ public class RpaProcessingService : IRpaProcessingService
     private readonly RpaSettings _settings;
     private readonly ILogger<RpaProcessingService> _logger;
     private readonly IChromeDriverManager _chromeDriverManager;
+    private readonly AppDbContext _dbContext;
 
     public RpaProcessingService(
         IHttpClientFactory httpClientFactory,
         IOptions<RpaSettings> settings,
         ILogger<RpaProcessingService> logger,
-        IChromeDriverManager chromeDriverManager)
+        IChromeDriverManager chromeDriverManager,
+        AppDbContext dbContext)
     {
         _httpClientFactory = httpClientFactory;
         _settings = settings.Value;
         _logger = logger;
         _chromeDriverManager = chromeDriverManager;
+        _dbContext = dbContext;
     }
 
     public async Task ProcessAsync(ProcessRequestDto request)
@@ -60,18 +64,42 @@ public class RpaProcessingService : IRpaProcessingService
             // Wait for page to load
             await Task.Delay(3000);
 
-            // Find email field
-            var emailField = driver.FindElement(By.Id("email"));
+            // Fetch XPath values from rpa_settings table
+            var loginEmailXPath = await _dbContext.RpaSettings
+                .Where(s => s.Key == "loginEmail")
+                .Select(s => s.Value)
+                .FirstOrDefaultAsync();
+
+            var loginButtonXPath = await _dbContext.RpaSettings
+                .Where(s => s.Key == "loginbutton")
+                .Select(s => s.Value)
+                .FirstOrDefaultAsync();
+
+            if (string.IsNullOrEmpty(loginEmailXPath))
+            {
+                throw new InvalidOperationException("XPath for 'loginEmail' not found in rpa_settings table");
+            }
+
+            if (string.IsNullOrEmpty(loginButtonXPath))
+            {
+                throw new InvalidOperationException("XPath for 'loginbutton' not found in rpa_settings table");
+            }
+
+            _logger.LogInformation("XPath values retrieved: loginEmail='{LoginEmailXPath}', loginbutton='{LoginButtonXPath}'", 
+                loginEmailXPath, loginButtonXPath);
+
+            // Find email field using XPath
+            var emailField = driver.FindElement(By.XPath(loginEmailXPath));
             emailField.SendKeys(_settings.FacebookUsername);
 
-            // Find password field
+            // Find password field (keeping original implementation for password)
             var passwordField = driver.FindElement(By.Id("pass"));
             passwordField.SendKeys(_settings.FacebookPassword);
 
             _logger.LogInformation("Credentials entered, attempting login");
 
-            // Find and click login button
-            var loginButton = driver.FindElement(By.Name("login"));
+            // Find and click login button using XPath
+            var loginButton = driver.FindElement(By.XPath(loginButtonXPath));
             loginButton.Click();
 
             // Wait for login to process
