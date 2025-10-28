@@ -68,7 +68,8 @@ public class DashboardService : IDashboardService
             if (mostAllocatedRobot != null)
             {
                 viewModel.MostAllocatedRobotId = mostAllocatedRobot.RobotId;
-                var robot = await _appDbContext.Robots.FindAsync(mostAllocatedRobot.RobotId);
+                var robot = await _appDbContext.Robots
+                    .FirstOrDefaultAsync(r => r.Id == mostAllocatedRobot.RobotId);
                 viewModel.MostAllocatedRobotName = robot?.Name;
             }
 
