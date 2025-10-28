@@ -50,7 +50,8 @@
                         <dd class="col-sm-9">
                             @if (!string.IsNullOrEmpty(Model.Robot.Token))
                             {
-                                <code>@Model.Robot.Token.Substring(0, Math.Min(10, Model.Robot.Token.Length))...</code>
+                                <code>••••••••</code>
+                                <small class="text-muted">(masked for security)</small>
                             }
                             else
                             {

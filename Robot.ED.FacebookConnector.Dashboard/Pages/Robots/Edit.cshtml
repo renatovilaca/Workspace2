@@ -34,9 +34,9 @@
                         
                         <div class="mb-3">
                             <label asp-for="Input.Token" class="form-label"></label>
-                            <input asp-for="Input.Token" class="form-control" />
+                            <input asp-for="Input.Token" class="form-control" type="password" />
                             <span asp-validation-for="Input.Token" class="text-danger"></span>
-                            <div class="form-text">Optional authentication token for this robot</div>
+                            <div class="form-text">Optional authentication token for this robot (will be masked)</div>
                         </div>
                         
                         <div class="d-flex justify-content-between">

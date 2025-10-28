@@ -23,9 +23,9 @@
                         
                         <div class="mb-3">
                             <label asp-for="Input.TokenValue" class="form-label"></label>
-                            <input asp-for="Input.TokenValue" class="form-control" />
+                            <input asp-for="Input.TokenValue" class="form-control" type="password" />
                             <span asp-validation-for="Input.TokenValue" class="text-danger"></span>
-                            <div class="form-text">The authentication token value</div>
+                            <div class="form-text">The authentication token value (will be masked)</div>
                         </div>
                         
                         <div class="d-flex justify-content-between">
