@@ -1,0 +1,56 @@
+@page
+@model Robot.ED.FacebookConnector.Dashboard.Pages.RpaSettings.DeleteModel
+@{
+    ViewData["Title"] = "Delete RPA Setting";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h1 class="display-4 mb-4">@ViewData["Title"]</h1>
+            
+            <div class="alert alert-warning" role="alert">
+                <i class="bi bi-exclamation-triangle"></i> Are you sure you want to delete this setting?
+            </div>
+            
+            <div class="card">
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-3">Key</dt>
+                        <dd class="col-sm-9"><code>@Model.RpaSetting.Key</code></dd>
+                        
+                        <dt class="col-sm-3">Value</dt>
+                        <dd class="col-sm-9">@Model.RpaSetting.Value</dd>
+                        
+                        <dt class="col-sm-3">Created At</dt>
+                        <dd class="col-sm-9">@Model.RpaSetting.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")</dd>
+                        
+                        <dt class="col-sm-3">Updated At</dt>
+                        <dd class="col-sm-9">
+                            @if (Model.RpaSetting.UpdatedAt.HasValue)
+                            {
+                                @Model.RpaSetting.UpdatedAt.Value.ToString("yyyy-MM-dd HH:mm:ss")
+                            }
+                            else
+                            {
+                                <span class="text-muted">Never</span>
+                            }
+                        </dd>
+                    </dl>
+                    
+                    <form method="post">
+                        <input type="hidden" asp-for="RpaSetting.Id" />
+                        <div class="d-flex justify-content-between">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Delete Setting
+                            </button>
+                            <a asp-page="./Index" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Back to List
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
