@@ -1,16 +1,16 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Robot.ED.FacebookConnector.Dashboard.Data;
+using Robot.ED.FacebookConnector.Common.Configuration;
 
 namespace Robot.ED.FacebookConnector.Dashboard.Pages.Robots;
 
 [Authorize(Roles = "Admin")]
 public class DeleteModel : PageModel
 {
-    private readonly ApplicationDbContext _context;
+    private readonly AppDbContext _context;
 
-    public DeleteModel(ApplicationDbContext context)
+    public DeleteModel(AppDbContext context)
     {
         _context = context;
     }
