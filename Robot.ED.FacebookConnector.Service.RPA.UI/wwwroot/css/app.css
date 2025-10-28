@@ -1,0 +1,247 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: #e0e0e0;
+    overflow: hidden;
+}
+
+.dashboard {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding: 20px;
+    gap: 20px;
+}
+
+.header {
+    text-align: center;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #0f3460;
+}
+
+.header h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #00d4ff;
+    margin-bottom: 10px;
+    text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-running {
+    background: linear-gradient(135deg, #00c853 0%, #00e676 100%);
+    color: #ffffff;
+    box-shadow: 0 0 15px rgba(0, 200, 83, 0.5);
+}
+
+.status-paused {
+    background: linear-gradient(135deg, #ff9800 0%, #ffb74d 100%);
+    color: #ffffff;
+    box-shadow: 0 0 15px rgba(255, 152, 0, 0.5);
+}
+
+.status-stopped {
+    background: linear-gradient(135deg, #424242 0%, #616161 100%);
+    color: #ffffff;
+    box-shadow: 0 0 15px rgba(66, 66, 66, 0.5);
+}
+
+.controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn-start, .btn-resume {
+    background: linear-gradient(135deg, #00c853 0%, #00e676 100%);
+    color: white;
+}
+
+.btn-start:hover, .btn-resume:hover {
+    background: linear-gradient(135deg, #00e676 0%, #69f0ae 100%);
+}
+
+.btn-pause {
+    background: linear-gradient(135deg, #ff9800 0%, #ffb74d 100%);
+    color: white;
+}
+
+.btn-pause:hover {
+    background: linear-gradient(135deg, #ffb74d 0%, #ffc947 100%);
+}
+
+.btn-stop {
+    background: linear-gradient(135deg, #f44336 0%, #ef5350 100%);
+    color: white;
+}
+
+.btn-stop:hover {
+    background: linear-gradient(135deg, #ef5350 0%, #ff6659 100%);
+}
+
+.btn-exit {
+    background: linear-gradient(135deg, #b71c1c 0%, #d32f2f 100%);
+    color: white;
+}
+
+.btn-exit:hover {
+    background: linear-gradient(135deg, #d32f2f 0%, #f44336 100%);
+}
+
+.icon {
+    font-size: 1.2rem;
+}
+
+.info-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    overflow-y: auto;
+}
+
+.info-card {
+    background: rgba(15, 52, 96, 0.5);
+    border: 1px solid #0f3460;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+.info-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #00d4ff;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.info-value {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.status-indicator {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 5px;
+}
+
+.execution-success {
+    background: linear-gradient(135deg, #00c853 0%, #00e676 100%);
+    color: white;
+    box-shadow: 0 0 15px rgba(0, 200, 83, 0.5);
+}
+
+.execution-failure {
+    background: linear-gradient(135deg, #f44336 0%, #ef5350 100%);
+    color: white;
+    box-shadow: 0 0 15px rgba(244, 67, 54, 0.5);
+}
+
+.status-message {
+    margin-top: 10px;
+    font-size: 0.875rem;
+    color: #b0bec5;
+    font-style: italic;
+}
+
+.api-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+}
+
+.api-status.running {
+    color: #00e676;
+}
+
+.api-status.stopped {
+    color: #ef5350;
+}
+
+.footer {
+    padding-top: 10px;
+    border-top: 2px solid #0f3460;
+    display: flex;
+    justify-content: center;
+}
+
+/* Scrollbar styling for dark theme */
+.info-section::-webkit-scrollbar {
+    width: 8px;
+}
+
+.info-section::-webkit-scrollbar-track {
+    background: rgba(15, 52, 96, 0.3);
+    border-radius: 4px;
+}
+
+.info-section::-webkit-scrollbar-thumb {
+    background: #0f3460;
+    border-radius: 4px;
+}
+
+.info-section::-webkit-scrollbar-thumb:hover {
+    background: #1a5490;
+}
+
+/* Loading animation */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.loading {
+    animation: pulse 1.5s ease-in-out infinite;
+}

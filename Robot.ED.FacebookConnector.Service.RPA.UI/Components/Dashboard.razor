@@ -1,0 +1,191 @@
+@using Robot.ED.FacebookConnector.Service.RPA.UI.Services
+@implements IDisposable
+@inject IRpaApiService ApiService
+@inject RpaStateService StateService
+@inject ILogger<Dashboard> Logger
+
+<div class="dashboard">
+    <div class="header">
+        <h1>Facebook Connector RPA</h1>
+        <div class="status-badge @GetStatusClass()">
+            @GetStatusText()
+        </div>
+    </div>
+
+    <div class="controls">
+        @if (StateService.State == RpaProcessState.Stopped)
+        {
+            <button class="btn btn-start" @onclick="StartRpa">
+                <span class="icon">▶</span>
+                Start
+            </button>
+        }
+        else if (StateService.State == RpaProcessState.Running)
+        {
+            <button class="btn btn-pause" @onclick="PauseRpa">
+                <span class="icon">⏸</span>
+                Pause
+            </button>
+        }
+        else if (StateService.State == RpaProcessState.Paused)
+        {
+            <button class="btn btn-resume" @onclick="ResumeRpa">
+                <span class="icon">▶</span>
+                Resume
+            </button>
+            <button class="btn btn-stop" @onclick="StopRpa">
+                <span class="icon">⏹</span>
+                Stop
+            </button>
+        }
+    </div>
+
+    <div class="info-section">
+        <div class="info-card">
+            <div class="info-label">Current Cycle Time</div>
+            <div class="info-value">@GetElapsedTime()</div>
+        </div>
+
+        <div class="info-card">
+            <div class="info-label">Last Execution</div>
+            <div class="status-indicator @GetLastExecutionClass()">
+                @GetLastExecutionText()
+            </div>
+            @if (!string.IsNullOrEmpty(StateService.LastExecutionMessage))
+            {
+                <div class="status-message">@StateService.LastExecutionMessage</div>
+            }
+        </div>
+
+        <div class="info-card">
+            <div class="info-label">API Server</div>
+            <div class="info-value">
+                @if (ApiService.IsRunning)
+                {
+                    <span class="api-status running">● Running (Port 8080/8081)</span>
+                }
+                else
+                {
+                    <span class="api-status stopped">● Stopped</span>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <button class="btn btn-exit" @onclick="RequestExit">
+            <span class="icon">✕</span>
+            Exit Application
+        </button>
+    </div>
+</div>
+
+@code {
+    private System.Threading.Timer? _timer;
+
+    protected override void OnInitialized()
+    {
+        StateService.StateChanged += OnStateChanged;
+        _timer = new System.Threading.Timer(_ => InvokeAsync(StateHasChanged), null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
+    }
+
+    private void OnStateChanged(object? sender, EventArgs e)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private async Task StartRpa()
+    {
+        try
+        {
+            Logger.LogInformation("Starting RPA service...");
+            await ApiService.StartAsync();
+            StateService.State = RpaProcessState.Stopped; // Ready to receive requests
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error starting RPA service");
+        }
+    }
+
+    private async Task StopRpa()
+    {
+        try
+        {
+            Logger.LogInformation("Stopping RPA service...");
+            await ApiService.StopAsync();
+            StateService.State = RpaProcessState.Stopped;
+            StateService.CurrentCycleStartTime = null;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error stopping RPA service");
+        }
+    }
+
+    private void PauseRpa()
+    {
+        Logger.LogInformation("Pausing RPA service...");
+        StateService.State = RpaProcessState.Paused;
+    }
+
+    private void ResumeRpa()
+    {
+        Logger.LogInformation("Resuming RPA service...");
+        StateService.State = RpaProcessState.Stopped;
+    }
+
+    private async Task RequestExit()
+    {
+        // This will be handled by the WinForms layer
+        await Task.CompletedTask;
+    }
+
+    private string GetStatusText()
+    {
+        return StateService.State switch
+        {
+            RpaProcessState.Running => "Running",
+            RpaProcessState.Paused => "Paused",
+            _ => "Stopped"
+        };
+    }
+
+    private string GetStatusClass()
+    {
+        return StateService.State switch
+        {
+            RpaProcessState.Running => "status-running",
+            RpaProcessState.Paused => "status-paused",
+            _ => "status-stopped"
+        };
+    }
+
+    private string GetElapsedTime()
+    {
+        var elapsed = StateService.GetCurrentCycleElapsedTime();
+        if (elapsed.HasValue)
+        {
+            return $"{elapsed.Value:mm\\:ss}";
+        }
+        return "--:--";
+    }
+
+    private string GetLastExecutionClass()
+    {
+        return StateService.LastExecutionSuccess ? "execution-success" : "execution-failure";
+    }
+
+    private string GetLastExecutionText()
+    {
+        return StateService.LastExecutionSuccess ? "Success" : "Failure";
+    }
+
+    public void Dispose()
+    {
+        _timer?.Dispose();
+        StateService.StateChanged -= OnStateChanged;
+    }
+}
