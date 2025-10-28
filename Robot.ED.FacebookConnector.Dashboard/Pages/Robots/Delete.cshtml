@@ -1,0 +1,80 @@
+@page
+@model Robot.ED.FacebookConnector.Dashboard.Pages.Robots.DeleteModel
+@{
+    ViewData["Title"] = "Delete Robot";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h1 class="display-4 mb-4">@ViewData["Title"]</h1>
+            
+            <div class="alert alert-warning" role="alert">
+                <i class="bi bi-exclamation-triangle"></i> Are you sure you want to delete this robot?
+            </div>
+            
+            <div class="card">
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-3">Name</dt>
+                        <dd class="col-sm-9">@Model.Robot.Name</dd>
+                        
+                        <dt class="col-sm-3">URL</dt>
+                        <dd class="col-sm-9">@Model.Robot.Url</dd>
+                        
+                        <dt class="col-sm-3">Available</dt>
+                        <dd class="col-sm-9">
+                            @if (Model.Robot.Available)
+                            {
+                                <span class="badge bg-success">Available</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning">Busy</span>
+                            }
+                        </dd>
+                        
+                        <dt class="col-sm-3">Last Allocated</dt>
+                        <dd class="col-sm-9">
+                            @if (Model.Robot.LastAllocatedAt.HasValue)
+                            {
+                                @Model.Robot.LastAllocatedAt.Value.ToString("yyyy-MM-dd HH:mm:ss")
+                            }
+                            else
+                            {
+                                <span class="text-muted">Never</span>
+                            }
+                        </dd>
+                        
+                        <dt class="col-sm-3">Token</dt>
+                        <dd class="col-sm-9">
+                            @if (!string.IsNullOrEmpty(Model.Robot.Token))
+                            {
+                                <code>@Model.Robot.Token.Substring(0, Math.Min(10, Model.Robot.Token.Length))...</code>
+                            }
+                            else
+                            {
+                                <span class="text-muted">N/A</span>
+                            }
+                        </dd>
+                        
+                        <dt class="col-sm-3">Created At</dt>
+                        <dd class="col-sm-9">@Model.Robot.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")</dd>
+                    </dl>
+                    
+                    <form method="post">
+                        <input type="hidden" asp-for="Robot.Id" />
+                        <div class="d-flex justify-content-between">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Delete Robot
+                            </button>
+                            <a asp-page="./Index" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Back to List
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,47 @@
+@page
+@model Robot.ED.FacebookConnector.Dashboard.Pages.RpaSettings.CreateModel
+@{
+    ViewData["Title"] = "Create RPA Setting";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h1 class="display-4 mb-4">@ViewData["Title"]</h1>
+            
+            <div class="card">
+                <div class="card-body">
+                    <form method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Input.Key" class="form-label"></label>
+                            <input asp-for="Input.Key" class="form-control" />
+                            <span asp-validation-for="Input.Key" class="text-danger"></span>
+                            <div class="form-text">Unique identifier for this setting</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Input.Value" class="form-label"></label>
+                            <textarea asp-for="Input.Value" class="form-control" rows="4"></textarea>
+                            <span asp-validation-for="Input.Value" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save"></i> Create Setting
+                            </button>
+                            <a asp-page="./Index" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Back to List
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -22,6 +22,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Common.Models.Queue> Queues => _appDbContext.Queues;
     public DbSet<Common.Models.QueueResult> QueueResults => _appDbContext.QueueResults;
     public DbSet<Common.Models.Robot> Robots => _appDbContext.Robots;
+    public DbSet<Common.Models.Token> Tokens => _appDbContext.Tokens;
+    public DbSet<Common.Models.RpaSetting> RpaSettings => _appDbContext.RpaSettings;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
