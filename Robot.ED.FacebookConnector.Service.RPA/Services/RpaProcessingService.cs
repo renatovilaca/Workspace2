@@ -15,20 +15,20 @@ public class RpaProcessingService : IRpaProcessingService
     private readonly RpaSettings _settings;
     private readonly ILogger<RpaProcessingService> _logger;
     private readonly IChromeDriverManager _chromeDriverManager;
-    private readonly AppDbContext _dbContext;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
 
     public RpaProcessingService(
         IHttpClientFactory httpClientFactory,
         IOptions<RpaSettings> settings,
         ILogger<RpaProcessingService> logger,
         IChromeDriverManager chromeDriverManager,
-        AppDbContext dbContext)
+        IServiceScopeFactory serviceScopeFactory)
     {
         _httpClientFactory = httpClientFactory;
         _settings = settings.Value;
         _logger = logger;
         _chromeDriverManager = chromeDriverManager;
-        _dbContext = dbContext;
+        _serviceScopeFactory = serviceScopeFactory;
     }
 
     public async Task ProcessAsync(ProcessRequestDto request)
@@ -64,10 +64,15 @@ public class RpaProcessingService : IRpaProcessingService
             // Wait for page to load
             await Task.Delay(3000);
 
-            // Fetch XPath values from rpa_settings table
-            var xpathSettings = await _dbContext.RpaSettings
-                .Where(s => s.Key == "loginEmail" || s.Key == "loginbutton")
-                .ToDictionaryAsync(s => s.Key, s => s.Value);
+            // Fetch XPath values from rpa_settings table using a new scope
+            Dictionary<string, string> xpathSettings;
+            using (var scope = _serviceScopeFactory.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                xpathSettings = await dbContext.RpaSettings
+                    .Where(s => s.Key == "loginEmail" || s.Key == "loginbutton")
+                    .ToDictionaryAsync(s => s.Key, s => s.Value);
+            }
 
             if (!xpathSettings.TryGetValue("loginEmail", out var loginEmailXPath) || string.IsNullOrEmpty(loginEmailXPath))
             {
