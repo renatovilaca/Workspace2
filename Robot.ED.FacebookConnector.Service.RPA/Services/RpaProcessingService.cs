@@ -65,28 +65,21 @@ public class RpaProcessingService : IRpaProcessingService
             await Task.Delay(3000);
 
             // Fetch XPath values from rpa_settings table
-            var loginEmailXPath = await _dbContext.RpaSettings
-                .Where(s => s.Key == "loginEmail")
-                .Select(s => s.Value)
-                .FirstOrDefaultAsync();
+            var xpathSettings = await _dbContext.RpaSettings
+                .Where(s => s.Key == "loginEmail" || s.Key == "loginbutton")
+                .ToDictionaryAsync(s => s.Key, s => s.Value);
 
-            var loginButtonXPath = await _dbContext.RpaSettings
-                .Where(s => s.Key == "loginbutton")
-                .Select(s => s.Value)
-                .FirstOrDefaultAsync();
-
-            if (string.IsNullOrEmpty(loginEmailXPath))
+            if (!xpathSettings.TryGetValue("loginEmail", out var loginEmailXPath) || string.IsNullOrEmpty(loginEmailXPath))
             {
                 throw new InvalidOperationException("XPath for 'loginEmail' not found in rpa_settings table");
             }
 
-            if (string.IsNullOrEmpty(loginButtonXPath))
+            if (!xpathSettings.TryGetValue("loginbutton", out var loginButtonXPath) || string.IsNullOrEmpty(loginButtonXPath))
             {
                 throw new InvalidOperationException("XPath for 'loginbutton' not found in rpa_settings table");
             }
 
-            _logger.LogInformation("XPath values retrieved: loginEmail='{LoginEmailXPath}', loginbutton='{LoginButtonXPath}'", 
-                loginEmailXPath, loginButtonXPath);
+            _logger.LogInformation("XPath values successfully retrieved from rpa_settings table");
 
             // Find email field using XPath
             var emailField = driver.FindElement(By.XPath(loginEmailXPath));
