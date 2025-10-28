@@ -1,9 +1,9 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Markup.Xaml;
 using Robot.ED.FacebookConnector.Service.RPA.MAUI.ViewModels;
 using Robot.ED.FacebookConnector.Service.RPA.MAUI.Views;
 using Robot.ED.FacebookConnector.Service.RPA.MAUI.Services;
+using Avalonia.Themes.Fluent;
 
 namespace Robot.ED.FacebookConnector.Service.RPA.MAUI;
 
@@ -11,7 +11,8 @@ public partial class App : Application
 {
     public override void Initialize()
     {
-        AvaloniaXamlLoader.Load(this);
+        // Apply Fluent theme
+        Styles.Add(new FluentTheme());
     }
 
     public override void OnFrameworkInitializationCompleted()
