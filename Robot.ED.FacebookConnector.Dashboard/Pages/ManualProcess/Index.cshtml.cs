@@ -17,6 +17,8 @@ public class IndexModel : PageModel
     private readonly IDashboardService _dashboardService;
     private readonly IConfiguration _configuration;
 
+    private const string DefaultApiUrl = "https://localhost:5001";
+
     [BindProperty]
     public AllocateRequestDto ProcessRequest { get; set; } = new();
 
@@ -58,11 +60,35 @@ public class IndexModel : PageModel
             return Page();
         }
 
+        // Validate AiConfig is valid JSON if provided
+        if (!string.IsNullOrWhiteSpace(ProcessRequest.AiConfig))
+        {
+            try
+            {
+                JsonDocument.Parse(ProcessRequest.AiConfig);
+            }
+            catch (JsonException)
+            {
+                ErrorMessage = "O campo 'Configuração AI' deve conter JSON válido.";
+                return Page();
+            }
+        }
+
         try
         {
-            var apiUrl = _configuration["ApiSettings:BaseUrl"] ?? "https://localhost:5001";
+            var apiUrl = _configuration["ApiSettings:BaseUrl"] ?? DefaultApiUrl;
+            
+            // Validate API URL
+            if (!Uri.TryCreate(apiUrl, UriKind.Absolute, out var validatedUri) || 
+                (validatedUri.Scheme != Uri.UriSchemeHttp && validatedUri.Scheme != Uri.UriSchemeHttps))
+            {
+                ErrorMessage = "Configuração de URL da API inválida.";
+                _logger.LogError("Invalid API URL configuration: {Url}", apiUrl);
+                return Page();
+            }
+
             var httpClient = _httpClientFactory.CreateClient();
-            httpClient.BaseAddress = new Uri(apiUrl);
+            httpClient.BaseAddress = validatedUri;
 
             var json = JsonSerializer.Serialize(ProcessRequest);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -75,11 +101,18 @@ public class IndexModel : PageModel
             if (response.IsSuccessStatusCode)
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
-                var result = JsonSerializer.Deserialize<AllocateResponse>(responseContent, 
+                var result = JsonSerializer.Deserialize<AllocateResponseDto>(responseContent, 
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-                QueueId = result?.Id;
-                UniqueId = result?.UniqueId;
+                if (result == null)
+                {
+                    ErrorMessage = "Erro ao processar resposta da API.";
+                    _logger.LogError("Failed to deserialize API response");
+                    return Page();
+                }
+
+                QueueId = result.Id;
+                UniqueId = result.UniqueId;
                 ShowStatus = true;
                 StatusMessage = $"Processo iniciado com sucesso! Queue ID: {QueueId}, Unique ID: {UniqueId}";
 
@@ -107,11 +140,5 @@ public class IndexModel : PageModel
         }
 
         return Page();
-    }
-
-    private class AllocateResponse
-    {
-        public int Id { get; set; }
-        public string UniqueId { get; set; } = string.Empty;
     }
 }
