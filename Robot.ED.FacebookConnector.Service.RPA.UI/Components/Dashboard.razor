@@ -107,7 +107,7 @@
             await InvokeAsync(StateHasChanged);
             
             await ApiService.StartAsync();
-            StateService.State = RpaProcessState.Stopped; // Ready to receive requests
+            StateService.State = RpaProcessState.Stopped; // API ready, awaiting process requests
             StateService.LastExecutionMessage = "API Service started successfully";
             StateService.LastExecutionSuccess = true;
             await InvokeAsync(StateHasChanged);
@@ -149,7 +149,7 @@
     private void ResumeRpa()
     {
         Logger.LogInformation("Resuming RPA service...");
-        StateService.State = RpaProcessState.Stopped;
+        StateService.State = RpaProcessState.Stopped; // Resume accepting process requests
     }
 
     private async Task RequestExit()
