@@ -15,25 +15,25 @@
     <div class="controls">
         @if (StateService.State == RpaProcessState.Stopped)
         {
-            <button class="btn btn-start" @onclick="StartRpa">
+            <button type="button" class="btn btn-start" @onclick="StartRpa">
                 <span class="icon">▶</span>
-                Start
+                Start @if (_startClickCount > 0) { <text>(@_startClickCount)</text> }
             </button>
         }
         else if (StateService.State == RpaProcessState.Running)
         {
-            <button class="btn btn-pause" @onclick="PauseRpa">
+            <button type="button" class="btn btn-pause" @onclick="PauseRpa">
                 <span class="icon">⏸</span>
                 Pause
             </button>
         }
         else if (StateService.State == RpaProcessState.Paused)
         {
-            <button class="btn btn-resume" @onclick="ResumeRpa">
+            <button type="button" class="btn btn-resume" @onclick="ResumeRpa">
                 <span class="icon">▶</span>
                 Resume
             </button>
-            <button class="btn btn-stop" @onclick="StopRpa">
+            <button type="button" class="btn btn-stop" @onclick="StopRpa">
                 <span class="icon">⏹</span>
                 Stop
             </button>
@@ -73,7 +73,7 @@
     </div>
 
     <div class="footer">
-        <button class="btn btn-exit" @onclick="RequestExit">
+        <button type="button" class="btn btn-exit" @onclick="RequestExit">
             <span class="icon">✕</span>
             Exit Application
         </button>
@@ -82,6 +82,7 @@
 
 @code {
     private System.Threading.Timer? _timer;
+    private int _startClickCount = 0;
 
     protected override void OnInitialized()
     {
@@ -96,33 +97,50 @@
 
     private async Task StartRpa()
     {
-        try
+        _startClickCount++;
+        Logger.LogInformation($"StartRpa called (click count: {_startClickCount})");
+        
+        await InvokeAsync(async () =>
         {
-            Logger.LogInformation("Starting RPA service...");
-            await ApiService.StartAsync();
-            StateService.State = RpaProcessState.Stopped; // Ready to receive requests
-            StateHasChanged();
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, "Error starting RPA service");
-        }
+            try
+            {
+                Logger.LogInformation("Starting RPA service...");
+                StateService.LastExecutionMessage = $"Starting... (attempt #{_startClickCount})";
+                StateHasChanged();
+                
+                await ApiService.StartAsync();
+                StateService.State = RpaProcessState.Stopped; // Ready to receive requests
+                StateService.LastExecutionMessage = "API Service started successfully";
+                StateService.LastExecutionSuccess = true;
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Error starting RPA service");
+                StateService.LastExecutionMessage = $"Error: {ex.Message}";
+                StateService.LastExecutionSuccess = false;
+                StateHasChanged();
+            }
+        });
     }
 
     private async Task StopRpa()
     {
-        try
+        await InvokeAsync(async () =>
         {
-            Logger.LogInformation("Stopping RPA service...");
-            await ApiService.StopAsync();
-            StateService.State = RpaProcessState.Stopped;
-            StateService.CurrentCycleStartTime = null;
-            StateHasChanged();
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, "Error stopping RPA service");
-        }
+            try
+            {
+                Logger.LogInformation("Stopping RPA service...");
+                await ApiService.StopAsync();
+                StateService.State = RpaProcessState.Stopped;
+                StateService.CurrentCycleStartTime = null;
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Error stopping RPA service");
+            }
+        });
     }
 
     private void PauseRpa()
