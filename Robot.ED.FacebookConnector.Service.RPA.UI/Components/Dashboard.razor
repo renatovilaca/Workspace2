@@ -100,47 +100,44 @@
         _startClickCount++;
         Logger.LogInformation($"StartRpa called (click count: {_startClickCount})");
         
-        await InvokeAsync(async () =>
+        try
         {
-            try
-            {
-                Logger.LogInformation("Starting RPA service...");
-                StateService.LastExecutionMessage = $"Starting... (attempt #{_startClickCount})";
-                StateHasChanged();
-                
-                await ApiService.StartAsync();
-                StateService.State = RpaProcessState.Stopped; // Ready to receive requests
-                StateService.LastExecutionMessage = "API Service started successfully";
-                StateService.LastExecutionSuccess = true;
-                StateHasChanged();
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError(ex, "Error starting RPA service");
-                StateService.LastExecutionMessage = $"Error: {ex.Message}";
-                StateService.LastExecutionSuccess = false;
-                StateHasChanged();
-            }
-        });
+            Logger.LogInformation("Starting RPA service...");
+            StateService.LastExecutionMessage = $"Starting... (attempt #{_startClickCount})";
+            await InvokeAsync(StateHasChanged);
+            
+            await ApiService.StartAsync();
+            StateService.State = RpaProcessState.Stopped; // Ready to receive requests
+            StateService.LastExecutionMessage = "API Service started successfully";
+            StateService.LastExecutionSuccess = true;
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error starting RPA service");
+            StateService.LastExecutionMessage = $"Error: {ex.Message}";
+            StateService.LastExecutionSuccess = false;
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
     private async Task StopRpa()
     {
-        await InvokeAsync(async () =>
+        try
         {
-            try
-            {
-                Logger.LogInformation("Stopping RPA service...");
-                await ApiService.StopAsync();
-                StateService.State = RpaProcessState.Stopped;
-                StateService.CurrentCycleStartTime = null;
-                StateHasChanged();
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError(ex, "Error stopping RPA service");
-            }
-        });
+            Logger.LogInformation("Stopping RPA service...");
+            await ApiService.StopAsync();
+            StateService.State = RpaProcessState.Stopped;
+            StateService.CurrentCycleStartTime = null;
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error stopping RPA service");
+            StateService.LastExecutionMessage = $"Stop Error: {ex.Message}";
+            StateService.LastExecutionSuccess = false;
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
     private void PauseRpa()
