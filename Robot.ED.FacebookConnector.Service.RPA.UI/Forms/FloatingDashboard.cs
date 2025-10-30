@@ -18,6 +18,13 @@ public class FloatingDashboard : Form
             Services = serviceProvider
         };
 
+#if DEBUG
+        _blazorWebView.BlazorWebViewInitialized += (sender, args) =>
+        {
+            args.WebView.CoreWebView2.Settings.AreDevToolsEnabled = true;
+        };
+#endif
+
         _blazorWebView.RootComponents.Add<Components.Dashboard>("#app");
         
         this.Controls.Add(_blazorWebView);
