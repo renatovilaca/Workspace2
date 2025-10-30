@@ -23,4 +23,11 @@ public interface IChromeDriverManager
     /// Disposes the current driver instance.
     /// </summary>
     void DisposeDriver();
+
+    /// <summary>
+    /// Opens the Facebook website (https://www.facebook.com) in the browser.
+    /// This method is called automatically during initialization and can be called manually if needed.
+    /// No parameters required, no return value, and does not send data to orchestrator.
+    /// </summary>
+    Task OpenFacebookWebsiteAsync();
 }

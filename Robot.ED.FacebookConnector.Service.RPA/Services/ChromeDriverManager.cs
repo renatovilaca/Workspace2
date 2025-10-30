@@ -54,8 +54,8 @@ public class ChromeDriverManager : IChromeDriverManager, IDisposable
 
             _logger.LogInformation("ChromeDriver initialized successfully");
 
-            // Execute crawler after initialization
-            await ExecuteCrawlerAsync();
+            // Open Facebook website after initialization
+            await OpenFacebookWebsiteAsync();
         }
         catch (Exception ex)
         {
@@ -131,28 +131,28 @@ public class ChromeDriverManager : IChromeDriverManager, IDisposable
         }
     }
 
-    private async Task ExecuteCrawlerAsync()
+    public async Task OpenFacebookWebsiteAsync()
     {
         try
         {
             if (_driver == null)
             {
-                _logger.LogWarning("Cannot execute crawler - driver is null");
+                _logger.LogWarning("Cannot open Facebook website - driver is null");
                 return;
             }
 
-            _logger.LogInformation("Executing crawler - navigating to Facebook");
+            _logger.LogInformation("Opening Facebook website - navigating to https://www.facebook.com");
             _driver.Navigate().GoToUrl("https://www.facebook.com");
 
             // Wait for page to load
             await Task.Delay(3000);
 
-            _logger.LogInformation("Crawler executed successfully - Facebook page loaded");
+            _logger.LogInformation("Facebook website opened successfully");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error executing crawler");
-            // Don't throw - crawler execution failure shouldn't prevent driver initialization
+            _logger.LogError(ex, "Error opening Facebook website");
+            // Don't throw - failure to open Facebook shouldn't prevent driver initialization
         }
     }
 
