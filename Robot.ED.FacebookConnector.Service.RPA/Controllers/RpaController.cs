@@ -20,7 +20,7 @@ public class RpaController : ControllerBase
     }
 
     [HttpPost("process")]
-    public async Task<IActionResult> Process([FromBody] ProcessRequestDto request)
+    public Task<IActionResult> Process([FromBody] ProcessRequestDto request)
     {
         try
         {
@@ -40,12 +40,12 @@ public class RpaController : ControllerBase
                 }
             });
 
-            return Accepted(new { message = "Request accepted for processing", queueId = request.QueueId });
+            return Task.FromResult<IActionResult>(Accepted(new { message = "Request accepted for processing", queueId = request.QueueId }));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error accepting process request");
-            return StatusCode(500, new { error = "Internal server error" });
+            return Task.FromResult<IActionResult>(StatusCode(500, new { error = "Internal server error" }));
         }
     }
 }
