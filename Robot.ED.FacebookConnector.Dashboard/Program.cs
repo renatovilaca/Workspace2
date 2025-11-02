@@ -64,6 +64,9 @@ builder.Services.Configure<DashboardSettings>(
 // Register services
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 
+// Add HttpClient
+builder.Services.AddHttpClient();
+
 // Configure Kestrel
 var httpPort = builder.Configuration.GetValue<int>("Kestrel:HttpPort", 7000);
 var httpsPort = builder.Configuration.GetValue<int>("Kestrel:HttpsPort", 7001);
