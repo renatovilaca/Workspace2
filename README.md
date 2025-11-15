@@ -29,6 +29,7 @@ The system consists of 4 main components:
 - PostgreSQL 12 or higher
 - Chrome/Chromium browser (for RPA service)
 - ChromeDriver (compatible with your Chrome version)
+- Entity Framework Core Tools (for database migrations): `dotnet tool install --global dotnet-ef`
 
 ## Database Configuration
 
@@ -95,6 +96,164 @@ dotnet run
 
 **API Token:**
 - Token: `default-token` (configured in database seed)
+
+## Entity Framework Migrations
+
+This project uses Entity Framework Core for database management. Due to the presence of multiple DbContext classes in some projects, special care is needed when working with migrations.
+
+### Installing EF Core Tools
+
+First, ensure you have the EF Core tools installed:
+
+```bash
+dotnet tool install --global dotnet-ef
+```
+
+Verify installation:
+```bash
+dotnet ef --version
+```
+
+### Understanding the DbContext Structure
+
+- **API Project** (`Robot.ED.FacebookConnector.Service.API`):
+  - Single DbContext: `AppDbContext`
+  - Migrations location: `Migrations/`
+  
+- **Dashboard Project** (`Robot.ED.FacebookConnector.Dashboard`):
+  - **Two DbContexts** (requires `--context` parameter):
+    - `ApplicationDbContext` - For ASP.NET Identity tables (users, roles, etc.)
+      - Migrations location: `Migrations/`
+    - `AppDbContext` - For shared application data (queues, robots, etc.)
+      - Migrations location: `Migrations/AppDb/`
+
+### Using Helper Scripts (Recommended)
+
+To simplify working with migrations, we provide helper scripts for both Linux/macOS and Windows:
+
+#### Linux/macOS Scripts
+
+```bash
+# List migrations
+./migrations-list.sh api                              # API project
+./migrations-list.sh dashboard ApplicationDbContext   # Dashboard Identity
+./migrations-list.sh dashboard AppDbContext          # Dashboard Shared Data
+./migrations-list.sh dashboard all                   # Both Dashboard contexts
+
+# Add a new migration
+./migrations-add.sh api MigrationName
+./migrations-add.sh dashboard MigrationName ApplicationDbContext
+./migrations-add.sh dashboard MigrationName AppDbContext
+
+# Update database
+./migrations-update.sh api
+./migrations-update.sh dashboard ApplicationDbContext
+./migrations-update.sh dashboard AppDbContext
+
+# Remove last migration
+./migrations-remove.sh api
+./migrations-remove.sh dashboard ApplicationDbContext
+./migrations-remove.sh dashboard AppDbContext
+```
+
+#### Windows Scripts
+
+```batch
+REM List migrations
+migrations-list.bat api
+migrations-list.bat dashboard ApplicationDbContext
+migrations-list.bat dashboard AppDbContext
+migrations-list.bat dashboard all
+
+REM Add a new migration
+migrations-add.bat api MigrationName
+migrations-add.bat dashboard MigrationName ApplicationDbContext
+migrations-add.bat dashboard MigrationName AppDbContext
+
+REM Update database
+migrations-update.bat api
+migrations-update.bat dashboard ApplicationDbContext
+migrations-update.bat dashboard AppDbContext
+
+REM Remove last migration
+migrations-remove.bat api
+migrations-remove.bat dashboard ApplicationDbContext
+migrations-remove.bat dashboard AppDbContext
+```
+
+### Manual Migration Commands
+
+If you prefer to use `dotnet ef` commands directly:
+
+#### API Project (Single DbContext)
+
+```bash
+cd Robot.ED.FacebookConnector.Service.API
+
+# List migrations
+dotnet ef migrations list
+
+# Add migration
+dotnet ef migrations add MigrationName
+
+# Update database
+dotnet ef database update
+
+# Remove last migration
+dotnet ef migrations remove
+```
+
+#### Dashboard Project (Multiple DbContexts)
+
+**Important:** The Dashboard project has TWO DbContexts, so you MUST specify which one using the `--context` parameter.
+
+**For Identity tables (users, roles, etc.):**
+```bash
+cd Robot.ED.FacebookConnector.Dashboard
+
+# List migrations
+dotnet ef migrations list --context ApplicationDbContext
+
+# Add migration
+dotnet ef migrations add MigrationName --context ApplicationDbContext
+
+# Update database
+dotnet ef database update --context ApplicationDbContext
+
+# Remove last migration
+dotnet ef migrations remove --context ApplicationDbContext
+```
+
+**For shared application data (queues, robots, etc.):**
+```bash
+cd Robot.ED.FacebookConnector.Dashboard
+
+# List migrations
+dotnet ef migrations list --context AppDbContext
+
+# Add migration
+dotnet ef migrations add MigrationName --context AppDbContext --output-dir Migrations/AppDb
+
+# Update database
+dotnet ef database update --context AppDbContext
+
+# Remove last migration
+dotnet ef migrations remove --context AppDbContext
+```
+
+### Common Issues and Solutions
+
+**Problem:** "More than one DbContext was found. Specify which one to use."
+
+**Solution:** This happens in the Dashboard project because it has two DbContexts. Always use the `--context` parameter or the helper scripts.
+
+**Problem:** Migrations are created in the wrong directory.
+
+**Solution:** For `AppDbContext` in the Dashboard project, always use `--output-dir Migrations/AppDb` to maintain consistency with existing migrations.
+
+**Problem:** "Unable to create an object of type 'AppDbContext'"
+
+**Solution:** Make sure you're in the correct project directory and that the connection string in `appsettings.json` is properly configured.
 
 ## Project Details
 
